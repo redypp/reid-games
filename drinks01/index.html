@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Guess the Drink Brands</title>
+<meta name="description" content="Guess how much 5 drink brands raised and sell a year. Then see how you did against Reid.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f3efe6; --ink:#121212; --red:#e23b2e; --green:#1b8a4b; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; background:#000; overflow:hidden; }
+  body { font-family:"Archivo","Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+  #stage { position:fixed; left:50%; top:50%; width:1920px; height:1080px; overflow:hidden; transform-origin:center; background:var(--paper); }
+  .scr { position:absolute; inset:0; display:none; }
+  .scr.on { display:block; }
+  .disp { font-family:"Anton",Impact,"Helvetica Neue",sans-serif; font-weight:400; text-transform:uppercase; line-height:.9; letter-spacing:.005em; }
+
+  /* top strip */
+  .strip { position:absolute; left:0; right:0; top:0; height:84px; display:flex; align-items:center; justify-content:space-between;
+           padding:0 80px; font-weight:900; font-size:24px; letter-spacing:.14em; text-transform:uppercase; }
+  .strip .prog { display:flex; gap:8px; }
+  .strip .prog i { width:54px; height:8px; background:currentColor; opacity:.22; }
+  .strip .prog i.on { opacity:1; }
+  .rule { position:absolute; left:80px; right:80px; top:84px; height:3px; background:currentColor; }
+
+  /* brand screens */
+  .brand { color:var(--fg); background:var(--bg); }
+  .brand .left { position:absolute; left:80px; top:150px; width:900px; }
+  .num { font-weight:900; font-size:26px; letter-spacing:.14em; }
+  .name { font-size:250px; margin-top:22px; }
+  .name.long { font-size:176px; }
+  .line { font-size:44px; font-weight:700; margin-top:34px; max-width:860px; line-height:1.15; }
+  .guessbox { position:absolute; left:80px; bottom:96px; display:flex; align-items:stretch; }
+  .guessbox .lbl { background:var(--fg); color:var(--bg); font-weight:900; font-size:30px; letter-spacing:.12em; padding:0 30px; display:flex; align-items:center; }
+  .guessbox .field { background:#fff; color:#121212; display:flex; align-items:center; padding:0 26px; font-family:"Anton",Impact,sans-serif; font-size:96px; height:136px; }
+  .guessbox input { font:inherit; border:none; outline:none; background:transparent; width:300px; color:#121212; text-align:center; }
+  .guessbox input::placeholder { color:#c9c4b8; }
+  .guessbox .u { color:#9a958a; }
+  .sub { position:absolute; left:80px; bottom:56px; font-size:22px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.7; }
+  .shot { position:absolute; right:110px; top:150px; width:760px; height:830px; display:flex; align-items:center; justify-content:center; }
+  .shot img.cut { max-height:100%; max-width:100%; filter:drop-shadow(0 30px 40px rgba(0,0,0,.25)); }
+  .shot .print { background:#fff; padding:18px; transform:rotate(2.2deg); box-shadow:0 24px 50px rgba(0,0,0,.28); }
+  .shot .print img { display:block; width:680px; height:680px; object-fit:cover; }
+
+  /* reveal */
+  .rv-top { position:absolute; left:80px; top:150px; font-weight:900; font-size:34px; letter-spacing:.12em; text-transform:uppercase; }
+  .rv-num { position:absolute; left:70px; top:210px; font-size:430px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .rv-cmp { position:absolute; left:80px; top:660px; display:flex; font-weight:900; font-size:38px; text-transform:uppercase; letter-spacing:.04em; }
+  .rv-cmp span { padding:14px 24px; }
+  .rv-cmp .me { background:var(--fg); color:var(--bg); }
+  .rv-cmp .off { background:#fff; color:#121212; }
+  .rv-fact { position:absolute; left:80px; top:780px; width:1060px; font-size:42px; font-weight:700; line-height:1.22; opacity:0; transform:translateY(14px); transition:all .45s ease-out; }
+  .rv-fact.show { opacity:1; transform:none; }
+  .rv-fact b { font-weight:900; text-decoration:underline; text-decoration-thickness:4px; text-underline-offset:6px; }
+  .rv-src { position:absolute; left:80px; bottom:40px; font-size:20px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.55; }
+  .rv-shot { position:absolute; right:100px; top:230px; width:520px; height:700px; display:flex; align-items:center; justify-content:center; }
+  .rv-shot img.cut { max-height:100%; max-width:100%; }
+  .rv-shot .print { background:#fff; padding:14px; transform:rotate(-2.5deg); box-shadow:0 20px 40px rgba(0,0,0,.28); }
+  .rv-shot .print img { display:block; width:470px; height:470px; object-fit:cover; }
+  .stamp { position:absolute; right:150px; top:150px; font-family:"Anton",Impact,sans-serif; font-size:54px; padding:8px 22px; border:6px solid; transform:rotate(-8deg); text-transform:uppercase; opacity:0; z-index:2; }
+  .stamp.show { opacity:1; animation:stamp .25s ease-out; }
+  @keyframes stamp { from { transform:rotate(-8deg) scale(1.6); opacity:0; } to { transform:rotate(-8deg) scale(1); opacity:1; } }
+
+  /* paper screens */
+  .paper { background:var(--paper); color:var(--ink); }
+  .title .kick { position:absolute; left:80px; top:150px; font-weight:900; font-size:30px; letter-spacing:.14em; text-transform:uppercase; }
+  .title h1 { position:absolute; left:72px; top:205px; font-size:220px; }
+  .title h1 em { font-style:normal; color:var(--red); }
+  .title .note { position:absolute; left:80px; top:830px; font-size:36px; font-weight:700; max-width:820px; line-height:1.2; }
+  .title .cans { position:absolute; right:60px; bottom:0; display:flex; align-items:flex-end; }
+  .title .cans img { height:420px; margin-left:-40px; filter:drop-shadow(0 20px 30px rgba(0,0,0,.2)); }
+  .title .tiles { position:absolute; left:80px; bottom:60px; display:flex; gap:14px; }
+  .title .tiles div { font-weight:900; font-size:22px; letter-spacing:.1em; text-transform:uppercase; padding:12px 18px; }
+
+  .part h1 { position:absolute; left:72px; top:300px; font-size:300px; }
+  .part .kick { position:absolute; left:80px; top:240px; font-weight:900; font-size:34px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); }
+  .part .note { position:absolute; left:80px; top:880px; font-size:44px; font-weight:700; max-width:1100px; line-height:1.2; }
+
+  .board h2 { position:absolute; left:72px; top:120px; font-size:120px; }
+  .board .rows { position:absolute; left:80px; top:290px; width:1100px; }
+  .board .row { display:grid; grid-template-columns:60px 330px 1fr 190px; align-items:center; height:104px; border-bottom:3px solid var(--ink); font-size:40px; font-weight:900; }
+  .board .row .rk { font-family:"Anton",Impact,sans-serif; font-size:46px; color:#9a958a; }
+  .board .row .bar { height:40px; width:0; transition:width .9s cubic-bezier(.2,.8,.2,1); }
+  .board .row .gs { font-size:24px; font-weight:700; color:#6b665c; letter-spacing:.06em; text-transform:uppercase; margin-top:6px; }
+  .board .row .act { text-align:right; font-family:"Anton",Impact,sans-serif; font-size:52px; }
+  .board .total { position:absolute; right:80px; top:290px; width:520px; background:var(--red); color:#fff; padding:36px 40px; }
+  .board .total .k { font-weight:900; font-size:26px; letter-spacing:.14em; text-transform:uppercase; }
+  .board .total .v { font-family:"Anton",Impact,sans-serif; font-size:150px; line-height:1; margin-top:14px; }
+  .board .total .d { font-weight:700; font-size:24px; margin-top:12px; opacity:.9; }
+  .board .total .both { margin-top:26px; padding-top:20px; border-top:3px solid rgba(255,255,255,.5); font-weight:900; font-size:28px; letter-spacing:.06em; text-transform:uppercase; }
+
+  .twist h2 { position:absolute; left:72px; top:120px; font-size:120px; }
+  .twist .legend { position:absolute; right:80px; top:150px; display:flex; gap:30px; font-weight:900; font-size:24px; letter-spacing:.1em; text-transform:uppercase; }
+  .twist .legend i { display:inline-block; width:22px; height:22px; vertical-align:-3px; margin-right:10px; }
+  .twist .grp { position:absolute; left:80px; width:1760px; }
+  .twist .grp .nm { font-family:"Anton",Impact,sans-serif; font-size:44px; text-transform:uppercase; }
+  .twist .b { display:flex; align-items:center; gap:18px; margin-top:6px; font-weight:900; font-size:24px; }
+  .twist .b div { height:28px; width:0; transition:width 1.1s cubic-bezier(.2,.8,.2,1); }
+  .twist .punch { position:absolute; left:80px; bottom:50px; font-family:"Anton",Impact,sans-serif; font-size:68px; text-transform:uppercase; }
+  .twist .punch em { font-style:normal; color:var(--red); }
+
+  .guessbox .go { margin-left:18px; border:none; background:var(--fg); color:var(--bg); font:900 34px "Archivo",sans-serif; padding:0 34px; cursor:pointer; }
+  .rv-cmp .reid { background:transparent; color:var(--fg); opacity:.75; }
+  .final .kick { position:absolute; left:80px; top:150px; font-weight:900; font-size:30px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); }
+  .final h1 { position:absolute; left:72px; top:200px; font-size:200px; }
+  .final .score { position:absolute; left:80px; top:440px; display:flex; gap:80px; align-items:flex-end; flex-wrap:wrap; width:1760px; }
+  .final .score div span { display:block; font-weight:900; font-size:30px; letter-spacing:.12em; text-transform:uppercase; }
+  .final .score div b { font-family:"Anton",Impact,sans-serif; font-weight:400; font-size:220px; line-height:1; }
+  .final .score div:last-of-type b { color:var(--red); }
+  .final .score p { width:100%; font-size:44px; font-weight:700; margin-top:30px; }
+  .final .links { position:absolute; left:80px; bottom:90px; display:flex; gap:20px; }
+  .final .links a { font-weight:900; font-size:30px; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--ink); padding:22px 34px; text-decoration:none; }
+  .final .links a:first-child { background:var(--red); }
+  #rotate { display:none; position:fixed; left:0; right:0; bottom:18%; text-align:center; color:#bbb; font:700 15px "Archivo",sans-serif; }
+  @media (orientation:portrait) and (max-width:700px) { #rotate { display:block; } #hud { display:none; } }
+  input { font-size:max(16px, 1em); }
+  #hud { position:fixed; bottom:8px; left:10px; color:#777; font:12px Helvetica; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="rotate">Turn your phone sideways for a bigger view ↻</div>
+<div id="hud">tap or → next · ← back · type a guess + Enter · F fullscreen · R restart</div>
+
+<script>
+// Figures are reported estimates (trackers disagree); see SCRIPT.md for sources.
+// raised / rev in $M; rev = most recent full year reported.
+const BRANDS = [
+  { name:"Recess", img:"img/recess_meta.jpg", cut:false, bg:"#f2a07b", fg:"#1d1410",
+    line:"Magnesium sparkling water. Now mocktails too.",
+    raised:84, raisedShow:"$84M", raisedFact:"Latest round: <b>$30M Series B</b>, October 2025.",
+    rev:30, revShow:"$30M", revFact:"Estimated <b>$20–40M</b> in sales for 2024 — and says it's doubling every year." },
+  { name:"LMNT", img:"img/lmnt.png", cut:false, bg:"#151515", fg:"#f3efe6",
+    line:"Salt packets for keto people. Now in cans.",
+    raised:5, raisedShow:"$5M", raisedFact:"Mostly <b>crowdfunding</b> — about $5M disclosed. Profitable since year one.",
+    rev:200, revShow:"$200M+", revFact:"Passed <b>$200M</b> in sales in 2023 — on about $5M raised." },
+  { name:"Olipop", img:"img/olipop.png", cut:true, bg:"#d8333d", fg:"#fff6ea",
+    line:"Prebiotic soda with the cartoon cans.",
+    raised:93, raisedShow:"$93M", raisedFact:"Valued at <b>$1.85 billion</b> in February 2025.",
+    rev:400, revShow:"$400M", revFact:"About <b>$400M</b> in 2024 — double the year before. Profitable." },
+  { name:"Poppi", img:"img/poppi.png", cut:true, bg:"#ffd640", fg:"#2a1020",
+    line:"Apple cider vinegar soda. Started on Shark Tank.",
+    raised:39, raisedShow:"$39M", raisedFact:"Then <b>PepsiCo bought it for $1.95 billion</b> in 2025.",
+    rev:500, revShow:"$500M+", revFact:"Over <b>$500M</b> in 2024 — the year before PepsiCo bought it." },
+  { name:"Liquid Death", img:"img/ld.png", cut:false, bg:"#0b0b0b", fg:"#e9d9a6",
+    line:"It's water. In a tallboy. With a skull.",
+    raised:267, raisedShow:"$267M+", raisedFact:"Valued at <b>$1.4 billion</b> in 2024 — less than Olipop or Poppi.",
+    rev:333, revShow:"$333M", revFact:"About <b>$333M</b> in 2024 — less than Olipop, on 3x the money raised." },
+];
+const WORTH = { "Olipop":1850, "Poppi":1950, "Liquid Death":1400 };
+const PARTS = {
+  1: { key:"raised", show:"raisedShow", fact:"raisedFact", tag:"Part 1 · How much did they raise?", q:"Raised from investors, all-time", rv:"actually raised" },
+  2: { key:"rev", show:"revShow", fact:"revFact", tag:"Part 2 · How much do they sell a year?", q:"Revenue per year", rv:"sells per year" },
+};
+
+function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function safeSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+let guesses = JSON.parse(safeGet("guesses2") || '{"1":{},"2":{}}');
+// when served by serve.py, every guess and screen change is written to take.jsonl
+let log = function() {};
+const TOUCH = matchMedia("(pointer: coarse)").matches;          // viewer version: nothing is recorded
+// what Reid said on camera (drinks01) — the score to beat
+const REID = {"1": {"Recess": 50, "LMNT": 90, "Olipop": 100, "Poppi": 50, "Liquid Death": 100},
+              "2": {"Recess": 40, "LMNT": 250, "Olipop": 500, "Poppi": 300, "Liquid Death": 150}};
+const VIDEO_URL = "";             // the YouTube link for this game (shown on the final screen)
+
+const fmt = m => m >= 1000 ? `$${(m/1000).toFixed(2).replace(/\.?0+$/,"")}B` : `$${Math.round(m)}M`;
+const dollars = m => (m*1e6).toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const imgHTML = b => b.cut ? `<img class="cut" src="${b.img}">` : `<div class="print"><img src="${b.img}"></div>`;
+
+const stage = document.getElementById("stage");
+const screens = [];
+function add(cls, html, opts={}) { const d=document.createElement("section"); d.className="scr "+cls; d.innerHTML=html; stage.appendChild(d); screens.push({el:d, ...opts}); return d; }
+const strip = (part, i) => `<div class="strip"><span>${PARTS[part].tag}</span>
+  <span class="prog">${BRANDS.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join("")}</span></div><div class="rule"></div>`;
+
+// ---- title
+add("paper title", `
+  <div class="kick">5 drink brands · guessed on vibes</div>
+  <h1 class="disp">Who raised<br>the <em>most</em><br>money?</h1>
+  <div class="note">Type your guess before each reveal. At the end, see if you beat Reid.<br><span style="font-size:28px;opacity:.6">Tap or press → to start</span></div>
+  <div class="tiles">${BRANDS.map(b=>`<div style="background:${b.bg};color:${b.fg}">${b.name}</div>`).join("")}</div>
+  <div class="cans"><img src="img/olipop.png"><img src="img/poppi.png" style="height:470px"></div>`);
+
+function brandScreens(part) {
+  const P = PARTS[part];
+  BRANDS.forEach((b,i) => {
+    const vars = `--bg:${b.bg};--fg:${b.fg}`;
+    add("brand", `${strip(part,i)}
+      <div class="left">
+        <div class="num">Brand 0${i+1} / 05</div>
+        <div class="name disp ${b.name.length>8?'long':''}">${b.name}</div>
+        <div class="line">${b.line}</div>
+      </div>
+      <div class="guessbox"><div class="lbl">Your guess</div><div class="field">$<input inputmode="decimal" enterkeyhint="go" placeholder="?" data-brand="${b.name}"><span class="u">M</span></div><button class="go">Reveal →</button></div>
+      <div class="sub">${P.q}</div>
+      <div class="shot">${imgHTML(b)}</div>`, { kind:"guess", part, brand:b }).style.cssText = vars;
+    add("brand", `${strip(part,i)}
+      <div class="rv-top">${b.name} ${P.rv}</div>
+      <div class="rv-num disp">$0M</div>
+      <div class="rv-cmp"></div>
+      <div class="rv-fact">${b[P.fact]}</div>
+      <div class="rv-src">Reported estimate</div>
+      <div class="stamp"></div>
+      <div class="rv-shot">${imgHTML(b)}</div>`, { kind:"reveal", part, brand:b }).style.cssText = vars;
+  });
+}
+const board = (part, title) => add("paper board", `<h2 class="disp">${title}</h2><div class="rows"></div><div class="total"></div>`, { kind:"board", part });
+
+// ---- part 1
+brandScreens(1);
+board(1, "Most money raised");
+add("paper twist", `<h2 class="disp">Raised vs. worth</h2>
+  <div class="legend"><span><i style="background:var(--ink)"></i>Raised</span><span><i style="background:var(--green)"></i>Worth</span></div>
+  <div class="bars"></div>
+  <div class="punch disp">Most money <em>≠</em> most valuable.</div>`, { kind:"twist", mode:"worth" });
+
+// ---- part 2
+add("paper part", `<div class="kick">Part 2</div><h1 class="disp">Guess the<br>revenue.</h1>
+  <div class="note">Same five brands. How much do they actually sell in a year?</div>`, { kind:"part" });
+brandScreens(2);
+board(2, "Biggest yearly sales");
+add("paper twist", `<h2 class="disp">Raised vs. sells a year</h2>
+  <div class="legend"><span><i style="background:var(--ink)"></i>Raised</span><span><i style="background:var(--red)"></i>Sells / year</span></div>
+  <div class="bars"></div>
+  <div class="punch disp">LMNT: <em>$5M</em> in, <em>$200M+</em> a year out.</div>`, { kind:"twist", mode:"rev" });
+
+// ---- final score (viewer version)
+add("paper final", `<div class="kick">Final score</div><h1 class="disp">You vs. Reid</h1>
+  <div class="score"></div><div class="links"></div>`, { kind:"final" });
+
+// ---- render helpers
+function renderBoard(s) {
+  const P = PARTS[s.part], g = guesses[s.part];
+  const list = [...BRANDS].sort((a,b)=>b[P.key]-a[P.key]);
+  const max = list[0][P.key];
+  s.el.querySelector(".rows").innerHTML = list.map((b,k)=>`
+    <div class="row"><span class="rk">${k+1}</span><span>${b.name}<div class="gs">${g[b.name]!=null?`You $${g[b.name]}M · `:""}Reid $${REID[s.part][b.name]}M</div></span>
+      <div><div class="bar" data-w="${b[P.key]/max*100}" style="background:${b.bg==="#ffd640"?"#e0b100":b.bg}"></div></div>
+      <span class="act">${b[P.show]}</span></div>`).join("");
+  const off = p => BRANDS.reduce((t,b)=>guesses[p][b.name]!=null ? t+Math.abs(guesses[p][b.name]-b[PARTS[p].key]) : t, 0);
+  const total = s.el.querySelector(".total");
+  total.style.display = BRANDS.some(b=>g[b.name]!=null) ? "block" : "none";
+  const roff = p => BRANDS.reduce((t,b)=>t+Math.abs(REID[p][b.name]-b[PARTS[p].key]), 0);
+  total.innerHTML = `<div class="k">You were off by</div><div class="v">${fmt(off(s.part))}</div>
+    <div class="d">Reid was off by ${fmt(roff(s.part))}</div>
+    ${s.part===2 ? `<div class="both">Both parts — you: ${fmt(off(1)+off(2))} · Reid: ${fmt(roff(1)+roff(2))}</div>` : ""}`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>s.el.querySelectorAll(".bar").forEach(e=>e.style.width=e.dataset.w+"%")));
+}
+function renderTwist(s) {
+  const worth = s.mode==="worth";
+  const list = worth ? BRANDS.filter(b=>WORTH[b.name]).sort((a,b)=>b.raised-a.raised) : BRANDS;
+  const max = worth ? 1950 : 520, gap = worth ? 200 : 136, top = worth ? 300 : 260;
+  s.el.querySelector(".bars").innerHTML = list.map((b,k)=>{
+    const second = worth ? WORTH[b.name] : b.rev;
+    const label = worth ? `worth ${fmt(WORTH[b.name])}` : `sells ${b.revShow} / yr`;
+    return `<div class="grp" style="top:${top+k*gap}px"><div class="nm">${b.name}</div>
+      <div class="b"><div style="background:var(--ink)" data-w="${b.raised/max*100}"></div>raised ${b.raisedShow}</div>
+      <div class="b"><div style="background:${worth?"var(--green)":"var(--red)"}" data-w="${second/max*100}"></div>${label}</div></div>`;}).join("");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>s.el.querySelectorAll(".b div").forEach(e=>e.style.width=`calc(${e.dataset.w}% * .78)`)));
+}
+let countUp = function(el, target, done) {
+  const t0 = performance.now(), dur = 1500;
+  const step = t => { const p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = `$${Math.round(target*e)}M`;
+    p<1 ? requestAnimationFrame(step) : done(); };
+  requestAnimationFrame(step);
+}
+
+// ---- navigation
+let cur = 0;
+function show(n) {
+  cur = Math.max(0, Math.min(screens.length-1, n));
+  screens.forEach((s,i)=>s.el.classList.toggle("on", i===cur));
+  const s = screens[cur];
+  log("screen", { n:cur, kind:s.kind||"title", part:s.part, brand:s.brand?.name });
+  if (s.kind==="guess") { const inp=s.el.querySelector("input"); inp.value = guesses[s.part][s.brand.name] ?? "";
+    if (!TOUCH) setTimeout(()=>inp.focus(),50); }    // on phones a forced focus zooms the page into the box
+  if (s.kind==="reveal") {
+    const P = PARTS[s.part], b = s.brand, num = s.el.querySelector(".rv-num");
+    const fact = s.el.querySelector(".rv-fact"), cmp = s.el.querySelector(".rv-cmp"), stamp = s.el.querySelector(".stamp");
+    fact.classList.remove("show"); stamp.classList.remove("show"); cmp.innerHTML = "";
+    countUp(num, b[P.key], () => {
+      num.textContent = b[P.show]; fact.classList.add("show");
+      const g = guesses[s.part][b.name];
+      if (g!=null) {
+        const diff = Math.abs(g-b[P.key]), close = diff/b[P.key] <= .45;
+        cmp.innerHTML = `<span class="me">You said $${g}M</span><span class="off">Off by ${fmt(diff)}</span><span class="reid">Reid said $${REID[s.part][b.name]}M</span>`;
+        stamp.textContent = close ? "Close" : "Way off"; stamp.style.color = close ? "#2fbf6b" : "#ff4a3a"; stamp.classList.add("show");
+      }
+    });
+  }
+  if (s.kind==="board") renderBoard(s);
+  if (s.kind==="twist") renderTwist(s);
+  if (s.kind==="final") renderFinal(s);
+}
+function renderFinal(s) {
+  const off = p => BRANDS.reduce((t,b)=>guesses[p][b.name]!=null ? t+Math.abs(guesses[p][b.name]-b[PARTS[p].key]) : t, 0);
+  const roff = p => BRANDS.reduce((t,b)=>t+Math.abs(REID[p][b.name]-b[PARTS[p].key]), 0);
+  const n = [1,2].reduce((t,p)=>t+BRANDS.filter(b=>guesses[p][b.name]!=null).length, 0);
+  const you = off(1)+off(2), reid = roff(1)+roff(2);
+  const verdict = n < 10 ? `You guessed ${n} of 10 — play again and guess them all.` : you < reid ? "You beat Reid. Tell him in the comments." : "Reid wins this one. Somehow.";
+  s.el.querySelector(".score").innerHTML = `<div><span>You</span><b>${n ? fmt(you) : "—"}</b></div><div><span>Reid</span><b>${fmt(reid)}</b></div><p>${verdict}</p>`;
+  s.el.querySelector(".links").innerHTML = (VIDEO_URL ? `<a href="${VIDEO_URL}">Watch the video</a>` : "") +
+    `<a href="#" onclick="guesses={1:{},2:{}};safeSet('guesses2',JSON.stringify(guesses));show(0);return false">Play again</a><a href="../">All games</a>`;
+}
+
+document.addEventListener("keydown", e => {
+  document.getElementById("hud").style.display = "none";
+  const inInput = e.target.tagName==="INPUT";
+  if (inInput && e.key==="Enter") {
+    const s = screens[cur], v = parseFloat(e.target.value);
+    if (!isNaN(v)) { guesses[s.part][s.brand.name] = v; safeSet("guesses2", JSON.stringify(guesses)); log("guess", { part:s.part, brand:s.brand.name, guess:v }); }
+    e.target.blur(); show(cur+1); return;
+  }
+  if (inInput) return;
+  if (/^[0-9.]$/.test(e.key) && screens[cur].kind==="guess") { screens[cur].el.querySelector("input").focus(); return; }
+  if (e.key==="ArrowRight" || e.key===" ") { e.preventDefault(); show(cur+1); }
+  if (e.key==="ArrowLeft") show(cur-1);
+  if (e.key==="f" || e.key==="F") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  if (e.key==="r" || e.key==="R") { guesses = {1:{},2:{}}; safeSet("guesses2", JSON.stringify(guesses)); log("reset"); show(0); }
+});
+stage.addEventListener("click", e => {
+  if (e.target.closest("a")) return;
+  if (e.target.classList.contains("go")) {            // phones: tap Reveal instead of Enter
+    e.stopPropagation();
+    const inp = screens[cur].el.querySelector("input"), v = parseFloat(inp.value), s = screens[cur];
+    if (!isNaN(v)) { guesses[s.part][s.brand.name] = v; safeSet("guesses2", JSON.stringify(guesses)); }
+    inp.blur(); window.scrollTo(0, 0); show(cur+1); return;
+  }
+  if (e.target.tagName!=="INPUT") show(cur+1);
+});
+
+// ---- render mode for the edit: show.html?render=1&n=8&p=0.4&g=<json guesses>
+// p = animation progress 0..1 (count-up, bars); everything static, nothing logged.
+const RQ = new URLSearchParams(location.search);
+if (RQ.get("render")) {
+  log = () => {};
+  document.getElementById("hud").remove();
+  document.head.insertAdjacentHTML("beforeend", `<style>*{transition:none!important;animation:none!important}
+    /* keep the bottom-right corner clear for the face cutout in the edit */
+    .shot{top:330px;right:400px;width:620px;height:660px}
+    .shot .print img{width:540px;height:540px}
+    .rv-num{font-size:300px;top:230px}
+    .rv-cmp{top:600px} .rv-fact{top:720px;width:1180px}
+    .rv-shot{right:90px;top:150px;width:440px;height:460px}
+    .rv-shot .print img{width:380px;height:380px}
+    .stamp{right:70px;top:120px}
+    .board .total{top:230px}
+    .twist .legend{top:56px;right:80px}</style>`);
+  if (RQ.get("g")) guesses = JSON.parse(RQ.get("g"));
+  const p = parseFloat(RQ.get("p") ?? "1"), e = 1-Math.pow(1-p,3);
+  countUp = (el, target, done) => { el.textContent = `$${Math.round(target*e)}M`; if (p>=1) done(); };
+  const raf = requestAnimationFrame;
+  window.requestAnimationFrame = f => f(performance.now());
+  const n = parseInt(RQ.get("n") || "0");
+  addEventListener("load", () => {
+    show(n);
+    document.querySelectorAll(".bar, .b div").forEach(el => { if (el.dataset.w) el.style.width = el.classList.contains("bar") ? `${el.dataset.w*e}%` : `calc(${el.dataset.w*e}% * .62)`; });
+    document.body.dataset.ready = "1";
+  });
+}
+
+function fit() { const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight; const k = Math.min(vw/1920, vh/1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+// show.html#7 jumps straight to screen 7 (to pick back up mid-take)
+addEventListener("resize", fit); fit(); if (!RQ.get("render")) show(parseInt(location.hash.slice(1)) || 0);
+</script>
+</body>
+</html>

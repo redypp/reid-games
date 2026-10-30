@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reid's Guessing Games</title>
+<meta name="description" content="Play along with Reid's videos: guess the numbers first, then see how you did against him.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f3efe6; --ink:#121212; --red:#e23b2e; --mute:#6b665c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--paper); color:var(--ink); font-family:"Archivo","Helvetica Neue",Arial,sans-serif; }
+  .wrap { max-width:1080px; margin:0 auto; padding:56px 24px 80px; }
+  .kick { font-weight:900; font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); }
+  h1 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; line-height:.92;
+       font-size:clamp(56px, 11vw, 132px); margin-top:14px; }
+  .lede { font-size:clamp(18px, 2.4vw, 22px); font-weight:700; max-width:620px; margin-top:20px; line-height:1.35; }
+  .rule { height:3px; background:var(--ink); margin:44px 0 28px; }
+  .games { display:grid; gap:20px; }
+  .game { display:grid; grid-template-columns:240px 1fr; background:#fff; text-decoration:none; color:inherit;
+          border:3px solid var(--ink); transition:transform .12s ease; }
+  .game:hover { transform:translate(-3px,-3px); box-shadow:6px 6px 0 var(--ink); }
+  .stripe { display:grid; grid-template-rows:repeat(5,1fr); }
+  .stripe span { display:flex; align-items:center; padding:0 16px; font-weight:900; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+  .body { padding:26px 28px; display:flex; flex-direction:column; gap:12px; }
+  .num { font-weight:900; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
+  .body h2 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; font-size:clamp(30px, 4.4vw, 46px); line-height:.95; }
+  .body p { font-size:17px; line-height:1.4; color:#3a3732; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; }
+  .btn { font-weight:900; font-size:15px; letter-spacing:.06em; text-transform:uppercase; padding:14px 20px; background:var(--ink); color:#fff; text-decoration:none; }
+  .btn.alt { background:transparent; color:var(--ink); border:2px solid var(--ink); }
+  .soon { border-style:dashed; color:var(--mute); padding:26px 28px; font-weight:700; }
+  footer { margin-top:56px; font-size:14px; color:var(--mute); line-height:1.6; }
+  footer a { color:inherit; }
+  @media (max-width:640px) {
+    .wrap { padding:36px 16px 60px; }
+    .game { grid-template-columns:1fr; }
+    .stripe { grid-template-rows:none; grid-template-columns:repeat(5,1fr); height:44px; }
+    .stripe span { font-size:0; padding:0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">Play along</div>
+  <h1>Reid's<br>guessing games</h1>
+  <p class="lede">Every guessing game from my videos. Guess the numbers before each reveal, then see if you beat me.</p>
+  <div class="rule"></div>
+  <div class="games" id="games"></div>
+  <footer>
+    Numbers are reported estimates (private companies don't publish them). Brand images used for commentary.<br>
+    <span id="channel"></span>
+  </footer>
+</div>
+<script>
+// add a game: drop its folder next to this file and add a line here (newest first)
+const CHANNEL_URL = "";
+const GAMES = [
+  { slug: "drinks01", n: 1, title: "5 drink brands: how much did they raise?",
+    blurb: "Recess, LMNT, Olipop, Poppi, Liquid Death. Guess what they raised, then what they sell a year. Reid was off by $847M.",
+    meta: "10 guesses · about 5 minutes", video: "",
+    brands: [["Recess","#f2a07b","#1d1410"],["LMNT","#151515","#f3efe6"],["Olipop","#d8333d","#fff6ea"],["Poppi","#ffd640","#2a1020"],["Liquid Death","#0b0b0b","#e9d9a6"]] },
+];
+document.getElementById("games").innerHTML = GAMES.map(g => `
+  <a class="game" href="${g.slug}/">
+    <div class="stripe">${g.brands.map(([n,bg,fg]) => `<span style="background:${bg};color:${fg}">${n}</span>`).join("")}</div>
+    <div class="body">
+      <div class="num">Game ${String(g.n).padStart(2,"0")} · ${g.meta}</div>
+      <h2>${g.title}</h2>
+      <p>${g.blurb}</p>
+      <div class="row"><span class="btn">Play →</span>${g.video ? `<span class="btn alt" onclick="event.preventDefault();location.href='${g.video}'">Watch the video</span>` : ""}</div>
+    </div>
+  </a>`).join("") + `<div class="soon">More games with every new video.</div>`;
+if (CHANNEL_URL) document.getElementById("channel").innerHTML = `<a href="${CHANNEL_URL}">My YouTube channel</a>`;
+</script>
+</body>
+</html>
