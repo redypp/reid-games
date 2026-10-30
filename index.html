@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reid's Guessing Games</title>
-<meta name="description" content="Play along with Reid's videos: guess the numbers first, then see how you did against him.">
+<title>Play Along With Reid</title>
+<meta name="description" content="Pick the video you're watching and play along with Reid: guess first, then see if you beat him.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -14,64 +14,74 @@
   .wrap { max-width:1080px; margin:0 auto; padding:56px 24px 80px; }
   .kick { font-weight:900; font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); }
   h1 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; line-height:.92;
-       font-size:clamp(56px, 11vw, 132px); margin-top:14px; }
+       font-size:clamp(52px, 10.5vw, 124px); margin-top:14px; }
   .lede { font-size:clamp(18px, 2.4vw, 22px); font-weight:700; max-width:620px; margin-top:20px; line-height:1.35; }
-  .rule { height:3px; background:var(--ink); margin:44px 0 28px; }
-  .games { display:grid; gap:20px; }
-  .game { display:grid; grid-template-columns:240px 1fr; background:#fff; text-decoration:none; color:inherit;
-          border:3px solid var(--ink); transition:transform .12s ease; }
-  .game:hover { transform:translate(-3px,-3px); box-shadow:6px 6px 0 var(--ink); }
-  .stripe { display:grid; grid-template-rows:repeat(5,1fr); }
-  .stripe span { display:flex; align-items:center; padding:0 16px; font-weight:900; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
-  .body { padding:26px 28px; display:flex; flex-direction:column; gap:12px; }
-  .num { font-weight:900; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
-  .body h2 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; font-size:clamp(30px, 4.4vw, 46px); line-height:.95; }
+  .rule { height:3px; background:var(--ink); margin:40px 0 28px; }
+  .videos { display:grid; gap:24px; }
+  .video { display:grid; grid-template-columns:1.05fr 1fr; color:inherit; text-decoration:none; border:3px solid var(--ink); background:#fff;
+           transition:transform .12s ease, box-shadow .12s ease; }
+  .video:hover { transform:translate(-3px,-3px); box-shadow:6px 6px 0 var(--ink); }
+  .art { position:relative; min-height:300px; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:0; padding:20px; }
+  .art img { height:210px; width:auto; max-width:34%; object-fit:contain; margin:0 -8px; filter:drop-shadow(0 12px 18px rgba(0,0,0,.3)); }
+  .art .tag { position:absolute; left:0; top:0; background:var(--red); color:#fff; font-weight:900; font-size:13px; letter-spacing:.12em; text-transform:uppercase; padding:9px 13px; }
+  .body { padding:28px; display:flex; flex-direction:column; gap:12px; justify-content:center; }
+  .num { font-weight:900; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+  .body h2 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; font-size:clamp(32px, 4.6vw, 50px); line-height:.96; }
   .body p { font-size:17px; line-height:1.4; color:#3a3732; }
-  .row { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; }
-  .btn { font-weight:900; font-size:15px; letter-spacing:.06em; text-transform:uppercase; padding:14px 20px; background:var(--ink); color:#fff; text-decoration:none; }
-  .btn.alt { background:transparent; color:var(--ink); border:2px solid var(--ink); }
-  .soon { border-style:dashed; color:var(--mute); padding:26px 28px; font-weight:700; }
-  footer { margin-top:56px; font-size:14px; color:var(--mute); line-height:1.6; }
+  .btn { align-self:flex-start; margin-top:6px; font-weight:900; font-size:16px; letter-spacing:.06em; text-transform:uppercase; padding:15px 22px; background:var(--ink); color:#fff; }
+  .video:hover .btn { background:var(--red); }
+  .watch { font-weight:700; font-size:15px; color:var(--mute); }
+  footer { margin-top:52px; font-size:14px; color:var(--mute); line-height:1.6; }
   footer a { color:inherit; }
-  @media (max-width:640px) {
+  @media (max-width:720px) {
     .wrap { padding:36px 16px 60px; }
-    .game { grid-template-columns:1fr; }
-    .stripe { grid-template-rows:none; grid-template-columns:repeat(5,1fr); height:44px; }
-    .stripe span { font-size:0; padding:0; }
+    .video { grid-template-columns:1fr; }
+    .art { min-height:190px; }
+    .art img { height:140px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="kick">Play along</div>
-  <h1>Reid's<br>guessing games</h1>
-  <p class="lede">Every guessing game from my videos. Guess the numbers before each reveal, then see if you beat me.</p>
+  <div class="kick">Play along with me</div>
+  <h1>What video are you watching?</h1>
+  <p class="lede">Pick the video, then play the same game I played. Guess first, see the real answer, and find out if you beat me.</p>
   <div class="rule"></div>
-  <div class="games" id="games"></div>
+  <div class="videos" id="videos"></div>
   <footer>
-    Numbers are reported estimates (private companies don't publish them). Brand images used for commentary.<br>
+    Numbers are reported estimates, since private companies don't publish them. Brand images used for commentary.<br>
     <span id="channel"></span>
   </footer>
 </div>
 <script>
-// add a game: drop its folder next to this file and add a line here (newest first)
+// new video: drop its game folder next to this file, add it at the TOP of this list, push.
+// `video` / CHANNEL_URL are YouTube links; blank ones just don't show.
 const CHANNEL_URL = "";
-const GAMES = [
-  { slug: "drinks01", n: 1, title: "5 drink brands: how much did they raise?",
-    blurb: "Recess, LMNT, Olipop, Poppi, Liquid Death. Guess what they raised, then what they sell a year. Reid was off by $847M.",
-    meta: "10 guesses · about 5 minutes", video: "",
-    brands: [["Recess","#f2a07b","#1d1410"],["LMNT","#151515","#f3efe6"],["Olipop","#d8333d","#fff6ea"],["Poppi","#ffd640","#2a1020"],["Liquid Death","#0b0b0b","#e9d9a6"]] },
+const VIDEOS = [
+  { slug: "pouches01", video: "", title: "How much do I actually know about CPG?",
+    blurb: "ZALT, Grinds, Neutonic, Nectr, Ultra, then a ZYN boss level. 11 levels of caffeine, margins and deal math.",
+    score: "Reid scored 62/153. Beat that.", bg: "#0b0d17",
+    imgs: ["pouches01/img/grinds.png", "pouches01/img/neutonic.png", "pouches01/img/ultra.png", "pouches01/img/nectr.png"] },
+  { slug: "drinks01", video: "", title: "I guessed how much 5 drink brands raised",
+    blurb: "Recess, LMNT, Olipop, Poppi and Liquid Death. Guess what they raised, then what they sell a year.",
+    score: "Reid was off by $847M. Beat that.", bg: "#ffd640",
+    imgs: ["drinks01/img/olipop.png", "drinks01/img/poppi.png"] },
 ];
-document.getElementById("games").innerHTML = GAMES.map(g => `
-  <a class="game" href="${g.slug}/">
-    <div class="stripe">${g.brands.map(([n,bg,fg]) => `<span style="background:${bg};color:${fg}">${n}</span>`).join("")}</div>
-    <div class="body">
-      <div class="num">Game ${String(g.n).padStart(2,"0")} · ${g.meta}</div>
-      <h2>${g.title}</h2>
-      <p>${g.blurb}</p>
-      <div class="row"><span class="btn">Play →</span>${g.video ? `<span class="btn alt" onclick="event.preventDefault();location.href='${g.video}'">Watch the video</span>` : ""}</div>
+document.getElementById("videos").innerHTML = VIDEOS.map((v, i) => `
+  <a class="video" href="${v.slug}/">
+    <div class="art" style="background:${v.bg}">
+      ${i === 0 ? `<span class="tag">Latest video</span>` : ""}
+      ${v.imgs.map(src => `<img src="${src}" alt="">`).join("")}
     </div>
-  </a>`).join("") + `<div class="soon">More games with every new video.</div>`;
+    <div class="body">
+      <div class="num">Video ${String(VIDEOS.length - i).padStart(2, "0")}</div>
+      <h2>${v.title}</h2>
+      <p>${v.blurb}</p>
+      <p><b>${v.score}</b></p>
+      <span class="btn">Play along →</span>
+      ${v.video ? `<span class="watch" onclick="event.preventDefault();event.stopPropagation();location.href='${v.video}'">Watch the video</span>` : ""}
+    </div>
+  </a>`).join("");
 if (CHANNEL_URL) document.getElementById("channel").innerHTML = `<a href="${CHANNEL_URL}">My YouTube channel</a>`;
 </script>
 </body>

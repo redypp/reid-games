@@ -1,0 +1,393 @@
+<title>Pouch CPG IQ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How much do you actually know about CPG? Play Reid's nicotine pouch game and beat his score.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&family=Press+Start+2P&display=swap">
+<style>
+  /* Layout: one arcade cabinet column — sticky score HUD, one card per step, big tap targets. Single dark look on purpose. */
+  :root {
+    --bg:#0b0d17; --panel:#151a35; --panel2:#1c2148; --ink:#f4f1ea; --dim:#9297b3; --line:rgba(255,255,255,.12);
+    --neon:#ffd23f; --good:#2fe07a; --mid:#ffb020; --bad:#ff4a3a; --zyn:#4fd1ff;
+    --f-display:"Anton", Impact, "Arial Narrow", sans-serif;
+    --f-body:"Archivo", "Helvetica Neue", Arial, sans-serif;
+    --f-pixel:"Press Start 2P", ui-monospace, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing:border-box; }
+  html, body { background:var(--bg); color:var(--ink); }
+  body { font-family:var(--f-body); font-size:16px; line-height:1.45;
+    background:
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0/48px 48px,
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0/48px 48px,
+      radial-gradient(900px 600px at 50% 0%, #1f2550, var(--bg) 70%) var(--bg);
+    min-height:100%; }
+  body::before { content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top, 0px); z-index:10; background:#090b14; }
+  .wrap { max-width:760px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 48px; }
+  .px { font-family:var(--f-pixel); letter-spacing:.04em; }
+  .an { font-family:var(--f-display); text-transform:uppercase; line-height:.92; letter-spacing:.01em; }
+  button { font:inherit; cursor:pointer; }
+  button:focus-visible, input:focus-visible { outline:3px solid var(--neon); outline-offset:3px; }
+
+  /* HUD */
+  .hud { position:sticky; top:env(safe-area-inset-top, 0px); z-index:5; background:rgba(9,11,20,.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); margin-bottom:20px; }
+  .hud-in { max-width:760px; margin:0 auto; padding:12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); display:flex; align-items:center; gap:14px; }
+  .iq { display:flex; align-items:baseline; gap:8px; }
+  .iq .k { font-size:10px; color:var(--neon); }
+  .iq .v { font-family:var(--f-display); font-size:34px; line-height:1; font-variant-numeric:tabular-nums; }
+  .iq .v.bump { animation:bump .5s ease-out; }
+  .iq .of { font-size:9px; color:var(--dim); }
+  .hud .grow { flex:1; min-width:0; }
+  .lvl { font-size:9px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar { height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin-top:7px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--neon); transition:width .4s ease; }
+  .chips { display:flex; gap:6px; }
+  .chipx { font-size:9px; padding:7px 8px; border-radius:7px; border:1px solid var(--line); color:var(--neon); white-space:nowrap; }
+  .chipx.fire { background:#ff5a1f; border-color:#ffb38f; color:#fff; }
+  @keyframes bump { 30% { transform:scale(1.3); color:var(--neon); } }
+
+  /* card */
+  .card { position:relative; border-radius:28px; background:var(--b, var(--panel)); color:var(--f, var(--ink)); padding:24px 22px 26px; overflow:hidden;
+    box-shadow:0 10px 0 rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,255,255,.12); animation:in .45s cubic-bezier(.2,1.3,.4,1); }
+  .card.flip { animation:flip .55s cubic-bezier(.2,1.2,.4,1); }
+  @keyframes in { from { transform:translateY(30px) scale(.97); opacity:0; } }
+  @keyframes flip { from { transform:perspective(1200px) rotateY(-70deg); opacity:.2; } }
+  .tag { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .tag span { font-size:9px; padding:7px 9px; border-radius:6px; background:var(--f, var(--ink)); color:var(--b, var(--bg)); }
+  .tag span.ol { background:transparent; color:var(--f, var(--ink)); border:1.5px solid currentColor; }
+  .head { display:flex; gap:16px; align-items:flex-start; }
+  .head .txt { flex:1; min-width:0; }
+  .art { width:120px; flex:none; display:flex; justify-content:center; }
+  .art img.cut { width:100%; filter:drop-shadow(0 12px 16px rgba(0,0,0,.4)); }
+  .art .print { background:#fff; padding:6px; transform:rotate(3deg); }
+  .art .print img { display:block; width:100%; aspect-ratio:1; object-fit:cover; }
+  .mono { width:110px; height:110px; border-radius:50%; border:6px solid currentColor; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:30px; text-transform:uppercase; }
+  .name { font-size:clamp(34px, 9.5vw, 76px); margin:0 0 10px; }
+  .ask { font-size:clamp(20px, 5vw, 26px); font-weight:900; line-height:1.18; margin:0; text-wrap:balance; }
+
+  .slot { margin-top:22px; display:flex; align-items:center; background:#fff; color:#111; border-radius:18px; height:84px; padding:0 18px; box-shadow:0 6px 0 rgba(0,0,0,.3); }
+  .slot .u { font-family:var(--f-display); font-size:34px; color:#9a958a; }
+  .slot input { flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:var(--f-display); font-size:52px; text-align:center; color:#111; }
+  .slot input::placeholder { color:#d4d0c6; }
+  .row { display:flex; gap:10px; margin-top:16px; }
+  .btn { flex:1; border:none; border-radius:14px; padding:16px; font-family:var(--f-pixel); font-size:12px; background:var(--neon); color:#111; box-shadow:0 5px 0 rgba(0,0,0,.4); }
+  .btn:active { transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.4); }
+  .btn.ghost { flex:none; background:transparent; color:inherit; border:1.5px solid currentColor; box-shadow:none; opacity:.75; }
+
+  .opts { display:grid; gap:10px; margin-top:20px; grid-template-columns:repeat(2,1fr); }
+  .opts.five { grid-template-columns:1fr; }
+  .opts.five .opt { justify-content:flex-start; min-height:64px; font-size:28px; padding:10px 16px; }
+  .opt { min-width:0; }
+  .opt { border:none; border-radius:18px; min-height:84px; padding:12px; display:flex; align-items:center; gap:10px; justify-content:center;
+    font-family:var(--f-display); font-size:30px; text-transform:uppercase; box-shadow:0 6px 0 rgba(0,0,0,.4); }
+  .opt img { height:44px; }
+  .opt .dot { width:40px; height:40px; border-radius:50%; overflow:hidden; flex:none; }
+  .opt .dot img { width:100%; height:100%; object-fit:cover; }
+  .opt.word { font-size:40px; min-height:110px; }
+
+  /* reveal */
+  .q-small { font-size:15px; font-weight:900; opacity:.8; margin:0 0 6px; }
+  .big { font-size:clamp(72px, 22vw, 140px); margin:0; font-variant-numeric:tabular-nums; }
+  .verdict { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; font-weight:900; font-size:15px; text-transform:uppercase; }
+  .verdict span { padding:9px 12px; border-radius:10px; }
+  .verdict .me { background:var(--f, var(--ink)); color:var(--b, var(--bg)); }
+  .verdict .pts { color:#111; }
+  .stamp { position:absolute; right:18px; top:18px; font-family:var(--f-display); font-size:26px; text-transform:uppercase; padding:4px 12px; border:4px solid #111; border-radius:10px; color:#111; transform:rotate(-7deg); animation:stamp .3s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes stamp { from { transform:rotate(-7deg) scale(2); opacity:0; } }
+  .fact { font-size:19px; font-weight:700; line-height:1.35; margin:18px 0 0; }
+  .fact b { text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:4px; }
+  .src { font-size:8px; opacity:.6; margin-top:14px; line-height:1.6; }
+  .reid { margin-top:16px; padding:12px 14px; border-radius:14px; background:rgba(0,0,0,.25); font-weight:900; font-size:15px; }
+  .reid .px { font-size:9px; color:var(--neon); display:block; margin-bottom:6px; }
+  .shake { animation:shake .4s; }
+  @keyframes shake { 25%,75% { transform:translateX(-10px); } 50% { transform:translateX(10px); } }
+  .confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .confetti i { position:absolute; top:-20px; width:10px; height:16px; border-radius:2px; animation:fall var(--t) cubic-bezier(.3,.6,.5,1) forwards; }
+  @keyframes fall { to { transform:translate(var(--dx), 900px) rotate(var(--r)); } }
+
+  /* level splash */
+  .splash { border-radius:28px; padding:28px 22px; color:#fff; overflow:hidden; position:relative; box-shadow:0 10px 0 rgba(0,0,0,.45);
+    background:repeating-linear-gradient(-45deg, var(--lc) 0 30px, var(--lc2) 30px 60px); animation:in .45s ease-out; }
+  .splash .lv { display:inline-block; font-size:11px; background:#fff; color:#111; padding:9px 11px; border-radius:8px; }
+  .splash h2 { font-size:clamp(56px, 16vw, 104px); margin:16px 0 10px; text-shadow:0 6px 0 rgba(0,0,0,.3); text-wrap:balance; }
+  .splash p { font-size:20px; font-weight:900; margin:0 0 20px; text-shadow:0 2px 0 rgba(0,0,0,.3); }
+  .map { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px; }
+  .map b { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--f-pixel); font-size:9px; background:rgba(0,0,0,.35); color:rgba(255,255,255,.5); }
+  .map b.done { background:var(--good); color:#0b2a17; }
+  .map b.cur { background:#fff; color:#111; box-shadow:0 0 0 3px var(--neon); }
+
+  /* panels */
+  .panel { border-radius:28px; background:var(--panel); padding:24px 22px; box-shadow:0 10px 0 rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,255,255,.08); animation:in .45s ease-out; }
+  .panel .kick { font-size:10px; color:var(--neon); margin:0 0 10px; }
+  .panel h2 { font-size:clamp(40px, 11vw, 64px); margin:0 0 14px; text-wrap:balance; }
+  .panel .lead { color:var(--dim); font-size:17px; font-weight:700; margin:0 0 18px; }
+  .panel .lead b { color:var(--ink); }
+  .swaps { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .sw { background:var(--panel2); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .sw .from { font-family:var(--f-display); font-size:24px; text-transform:uppercase; color:var(--dim); text-decoration:line-through; text-decoration-color:var(--bad); text-decoration-thickness:3px; }
+  .sw .to { font-family:var(--f-display); font-size:28px; text-transform:uppercase; line-height:.95; }
+  .sw .eg { font-size:13px; color:var(--dim); font-weight:700; }
+  .sw.hi { background:var(--neon); color:#111; } .sw.hi .eg, .sw.hi .from { color:#333; }
+  .wf { display:flex; border-radius:14px; overflow:hidden; height:96px; margin:4px 0 10px; }
+  .wf div { display:flex; flex-direction:column; justify-content:center; padding:0 10px; color:#111; min-width:0; overflow:hidden; }
+  .wf .k { font-family:var(--f-pixel); font-size:8px; }
+  .wf .v { font-family:var(--f-display); font-size:clamp(22px, 6vw, 36px); line-height:1.05; margin-top:4px; }
+  .hbars { display:flex; flex-direction:column; gap:14px; }
+  .hb .lab { display:flex; justify-content:space-between; font-weight:900; font-size:15px; margin-bottom:6px; gap:10px; }
+  .hb .track { position:relative; height:26px; border-radius:8px; background:rgba(255,255,255,.07); }
+  .hb .fill { height:100%; border-radius:8px; width:0; transition:width .9s cubic-bezier(.2,.8,.2,1); }
+  .hb .mk { position:absolute; top:-5px; bottom:-5px; width:4px; border-radius:2px; background:var(--neon); }
+  .hb .you { font-size:12px; color:var(--neon); margin-top:4px; font-weight:900; }
+  .rows { display:flex; flex-direction:column; }
+  .rw { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 44px; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-weight:900; font-size:14px; }
+  .rw.hd { font-family:var(--f-pixel); font-size:8px; color:var(--dim); }
+  .rw .g { color:var(--dim); }
+  .rw .p { text-align:right; font-family:var(--f-display); font-size:22px; }
+  .chip { display:inline-block; font-family:var(--f-display); font-size:16px; text-transform:uppercase; padding:3px 8px; border-radius:6px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tot { margin-top:18px; border-radius:18px; background:var(--neon); color:#111; padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .tot .v { font-family:var(--f-display); font-size:48px; line-height:1; }
+  .tot .d { font-weight:900; font-size:14px; text-transform:uppercase; }
+
+  /* start + final */
+  .hero { padding:12px 0 6px; }
+  .hero .k { font-size:10px; color:var(--neon); }
+  .hero h1 { font-size:clamp(58px, 17vw, 112px); margin:14px 0 12px; text-shadow:0 8px 0 rgba(0,0,0,.4); text-wrap:balance; }
+  .hero h1 em { font-style:normal; color:var(--neon); }
+  .hero p { font-size:18px; font-weight:700; color:var(--dim); max-width:56ch; margin:0 0 18px; }
+  .hero p b { color:var(--ink); }
+  .cans { display:flex; align-items:flex-end; margin:10px 0 18px; }
+  .cans img { width:23%; max-width:130px; margin-right:-4%; filter:drop-shadow(0 10px 14px rgba(0,0,0,.5)); }
+  .rules { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:0 0 20px; }
+  .rules div { background:var(--panel); border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; color:var(--dim); }
+  .rules b { color:var(--ink); display:block; font-size:15px; }
+  .score-big { font-size:clamp(90px, 28vw, 170px); margin:0 0 14px; }
+  .score-big small { font-size:.4em; color:var(--dim); }
+  .rank { font-size:clamp(56px, 16vw, 96px); color:var(--neon); margin:6px 0 16px; text-shadow:0 0 30px rgba(255,210,63,.45); }
+  .ladder { display:flex; flex-direction:column-reverse; gap:6px; margin-bottom:18px; }
+  .ladder div { display:flex; justify-content:space-between; font-size:10px; padding:11px 12px; border-radius:10px; background:rgba(255,255,255,.05); color:var(--dim); }
+  .ladder div.me { background:var(--neon); color:#111; }
+  .share { background:var(--panel2); border-radius:14px; padding:14px; font-weight:700; font-size:15px; user-select:all; margin-bottom:10px; }
+  .note { font-size:13px; color:var(--dim); margin-top:10px; }
+
+  @media (min-width:620px) {
+    .opts.five { grid-template-columns:repeat(5,1fr); }
+    .opts.five .opt { flex-direction:column; font-size:24px; min-height:130px; }
+    .art { width:170px; }
+    .swaps { grid-template-columns:repeat(4,1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+</style>
+
+<div class="hud"><div class="hud-in">
+  <div class="iq"><span class="k px">CPG IQ</span><span class="v" id="iq">0</span><span class="of px" id="of"></span></div>
+  <div class="grow"><div class="lvl px" id="lvl">Press start</div><div class="bar"><i id="prog" style="width:0"></i></div></div>
+  <div class="chips"><span class="chipx px" id="streak" hidden></span><span class="chipx px" id="rank">Intern</span></div>
+</div></div>
+<main class="wrap" id="app"></main>
+
+<a href="../" style="position:fixed;left:12px;bottom:12px;z-index:50;font:900 12px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#f4f1ea;background:rgba(0,0,0,.55);padding:9px 12px;text-decoration:none;border-radius:6px">&larr; All games</a>
+<script src="game-data.js" charset="utf-8"></script>
+<script>
+// Viewer play-along version of the pouches01 video. Questions/scoring come from game-data.js;
+// REID (in that file) holds Reid's recorded answers once the video is cut.
+const KEY = "pouchPlay1";
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+let st = load() || { i:0, g:{}, done:{} };
+
+const STEPS = [{ t:"start" }];
+LEVELS.forEach((L, li) => {
+  STEPS.push({ t:"level", L, li });
+  L.qs.forEach((q, qi) => STEPS.push({ t:"q", q, L, li, qi }));
+  if (["thesis","habit","money","margin","mult"].includes(L.id)) STEPS.push({ t:"ins", L, li });
+  STEPS.push({ t:"clear", L, li });
+});
+STEPS.push({ t:"final" });
+
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const pic = (k, which="img") => { const s = SUBJ[k], src = s[which] || s.img;
+  if (!src) return `<div class="mono">${s.mono}</div>`;
+  return /\.png$/.test(src) ? `<img class="cut" src="${src}" alt="${nameOf(k)}">` : `<div class="print"><img src="${src}" alt="${nameOf(k)}"></div>`; };
+const chip = k => `<span class="chip" style="background:${SUBJ[k].bg};color:${SUBJ[k].fg}">${nameOf(k)}</span>`;
+const vars = k => `--b:${SUBJ[k].bg};--f:${SUBJ[k].fg}`;
+const pts = q => st.done[q.id] ? (score(q, st.g[q.id]) || 0) : 0;
+const total = () => ALLQ.reduce((t,q)=>t+pts(q),0);
+const lvlPts = L => L.qs.reduce((t,q)=>t+pts(q),0);
+const hasReid = Object.keys(REID).length > 0;
+const reidTotal = () => ALLQ.reduce((t,q)=>t+(score(q, REID[q.id])||0),0);
+
+function hud() {
+  const iq = document.getElementById("iq"), tot = total();
+  if (iq.textContent !== String(tot)) { iq.textContent = tot; iq.classList.remove("bump"); void iq.offsetWidth; iq.classList.add("bump"); }
+  document.getElementById("of").textContent = `/ ${MAXPTS}`;
+  let streak = 0; for (const q of ALLQ) { if (!st.done[q.id]) continue; const p = score(q, st.g[q.id]) || 0; streak = p/(q.x||1) >= 2 ? streak+1 : 0; }
+  const sk = document.getElementById("streak"); sk.hidden = streak < 2; sk.textContent = `Streak x${streak}`; sk.classList.toggle("fire", streak >= 2);
+  document.getElementById("rank").textContent = rankOf(tot);
+  const s = STEPS[st.i];
+  document.getElementById("lvl").textContent = s.L ? `${s.L.boss ? "Boss" : "Level " + (s.li+1)} · ${s.L.name}` : s.t === "final" ? "Game over" : "Press start";
+  document.getElementById("prog").style.width = `${st.i / (STEPS.length-1) * 100}%`;
+}
+function go(i) { st.i = Math.max(0, Math.min(STEPS.length-1, i)); persist(); render(); window.scrollTo({ top:0 }); }
+const next = () => go(st.i + 1);
+
+function render() {
+  const s = STEPS[st.i];
+  hud();
+  if (s.t === "start") return renderStart();
+  if (s.t === "level") return renderLevel(s);
+  if (s.t === "q") return st.done[s.q.id] ? renderReveal(s) : renderAsk(s);
+  if (s.t === "ins") return renderInsight(s);
+  if (s.t === "clear") return renderClear(s);
+  if (s.t === "final") return renderFinal();
+}
+
+function renderStart() {
+  const resumed = st.i === 0 && Object.keys(st.done).length > 0;
+  app.innerHTML = `<section class="hero">
+    <div class="k px">5 health pouches · 1 nicotine boss · ${LEVELS.length} levels</div>
+    <h1 class="an">How much do you know about <em>CPG?</em></h1>
+    <div class="cans">${["grinds","neutonic","ultra","nectr","zalt_mix"].map(k=>`<img src="img/${k}.${k==="zalt_mix"?"jpg":"png"}" alt="">`).join("")}</div>
+    <p>Play the same game Reid plays in the video. Guess the <b>caffeine, prices, margins and money</b> behind the nicotine-free pouch boom, then fight <b>ZYN</b>. Finish to get your rank, from <b>Intern</b> to <b>Partner</b>.</p>
+    <div class="rules">
+      <div><b>3 pts</b>within 20%</div><div><b>2 pts</b>within 50%</div><div><b>1 pt</b>within 2x</div><div><b>2x pts</b>on the boss</div>
+    </div>
+    <div class="row"><button class="btn" id="go" type="button">▶ ${resumed ? "Continue" : "Press start"}</button>
+    ${resumed ? `<button class="btn ghost" id="reset" type="button">Restart</button>` : ""}</div>
+  </section>`;
+  const firstOpen = () => { const j = STEPS.findIndex(x => x.t==="q" && !st.done[x.q.id]); return j < 0 ? STEPS.length-1 : j; };
+  document.getElementById("go").onclick = () => resumed ? go(firstOpen()) : next();
+  const r = document.getElementById("reset"); if (r) r.onclick = () => { st = { i:0, g:{}, done:{} }; persist(); render(); };
+}
+
+function renderLevel(s) {
+  const L = s.L;
+  app.innerHTML = `<section class="splash" style="--lc:${L.lc};--lc2:${L.lc2}">
+    <span class="lv px">${L.boss ? "Boss level" : "Level " + String(s.li+1).padStart(2,"0")}</span>
+    <h2 class="an">${L.name}</h2><p>${L.sub}</p>
+    <div class="map">${LEVELS.map((M,mi)=>`<b class="${mi<s.li?"done":mi===s.li?"cur":""}">${M.boss?"!":mi+1}</b>`).join("")}</div>
+    <div class="row"><button class="btn" id="go" type="button">Let's go</button></div></section>`;
+  document.getElementById("go").onclick = next;
+}
+
+function askHead(s) {
+  const q = s.q, k = q.s || null, art = k && k !== "Lightning" && !q.hide;
+  return `<div class="tag"><span class="px">Q${s.qi+1}/${s.L.qs.length}</span>${k?`<span class="px ol">${SUBJ[k].type}</span>`:""}${q.x?`<span class="px ol">2x points</span>`:""}</div>
+    <div class="head"><div class="txt">${k && k!=="Lightning" ? `<h3 class="name an">${nameOf(k)}</h3>` : ""}<p class="ask">${q.q}</p></div>${art?`<div class="art">${pic(k)}</div>`:""}</div>`;
+}
+function renderAsk(s) {
+  const q = s.q, k = q.s;
+  if (q.pick) {
+    const opts = OPTS[q.pick];
+    app.innerHTML = `<section class="card" style="${k ? vars(k) : ""}">${askHead(s)}
+      <div class="opts ${opts.length>2?"five":""}">${opts.map(o => o.brand
+        ? `<button class="opt" type="button" data-id="${o.id}" style="background:${SUBJ[o.brand].bg};color:${SUBJ[o.brand].fg}">${/\.png$/.test(SUBJ[o.brand].img) ? `<img src="${SUBJ[o.brand].img}" alt="">` : `<span class="dot"><img src="${SUBJ[o.brand].img}" alt=""></span>`}${o.label}</button>`
+        : `<button class="opt word" type="button" data-id="${o.id}" style="background:${o.bg};color:${o.fg}">${o.label}</button>`).join("")}</div></section>`;
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => lock(q, b.dataset.id));
+    return;
+  }
+  app.innerHTML = `<section class="card" style="${vars(k)}">${askHead(s)}
+    <form id="f" autocomplete="off">
+      <label class="slot" for="guess"><span class="u">${q.pre||""}</span><input id="guess" inputmode="decimal" placeholder="?" aria-label="Your guess"><span class="u">${(q.cents?"¢":q.post||"").trim()}</span></label>
+      <div class="row"><button class="btn" type="submit">Lock it in</button><button class="btn ghost" type="button" id="skip">Skip</button></div>
+    </form></section>`;
+  const inp = document.getElementById("guess");
+  setTimeout(() => inp.focus({ preventScroll:true }), 60);
+  document.getElementById("f").onsubmit = e => { e.preventDefault();
+    const v = parseFloat(inp.value.replace(/[$,¢%x\s]/gi, ""));
+    if (isNaN(v)) { inp.focus(); inp.placeholder = "#"; return; }
+    lock(q, v); };
+  document.getElementById("skip").onclick = () => lock(q, null);
+}
+function lock(q, v) { if (v != null) st.g[q.id] = v; else delete st.g[q.id]; st.done[q.id] = true; persist(); render(); }
+
+function renderReveal(s) {
+  const q = s.q, k = q.pick === "brands" ? q.ans : q.s, g = st.g[q.id], p = score(q, g), lvl = p == null ? null : p/(q.x||1);
+  const answer = q.pick === "brands" ? q.ans : (q.show || fmtVal(q, q.ans));
+  const r = REID[q.id], rp = score(q, r);
+  app.innerHTML = `<section class="card flip" style="${vars(k)}">
+    ${lvl != null ? `<div class="stamp" style="background:${VCOL[lvl]}">${q.pick ? (p ? "Got it" : "Nope") : VERDICT[lvl]}</div>` : ""}
+    <div class="tag"><span class="px">Q${s.qi+1}/${s.L.qs.length}</span><span class="px ol">${nameOf(k)}</span></div>
+    <p class="q-small">${q.q}</p>
+    <p class="big an">${answer}</p>
+    <div class="verdict">${g != null ? `<span class="me">You said ${esc(fmtVal(q, g))}</span><span class="pts" style="background:${VCOL[lvl]}">+${p} pts</span>` : `<span class="me">Skipped · +0</span>`}</div>
+    <p class="fact">${q.fact}</p>
+    ${hasReid && r != null ? `<div class="reid"><span class="px">Reid's guess</span>${esc(fmtVal(q, r))} · +${rp} pts</div>` : ""}
+    ${q.src ? `<div class="src px">Source: ${q.src}</div>` : ""}
+    <div class="row"><button class="btn" id="go" type="button">Next ▶</button></div>
+    <div class="confetti"></div></section>`;
+  document.getElementById("go").onclick = next;
+  const card = app.querySelector(".card");
+  if (lvl === 3) confetti(card.querySelector(".confetti"));
+  if (lvl === 0) setTimeout(() => card.classList.add("shake"), 300);
+}
+function confetti(box) {
+  const cols = ["#ffd23f","#2fe07a","#ff3d7f","#4fd1ff","#ffffff","#ff8a1f"];
+  box.innerHTML = Array.from({length:50},()=>`<i style="left:${Math.random()*100}%;background:${cols[Math.random()*6|0]};--dx:${(Math.random()-.5)*240}px;--r:${Math.random()*720}deg;--t:${1+Math.random()}s;animation-delay:${Math.random()*.2}s"></i>`).join("");
+}
+
+const INS = {
+  thesis: () => `<div class="kick px">The thesis</div><h2 class="an">Everyone's swapping vices</h2>
+    <div class="swaps">
+      <div class="sw"><span class="from">Beer</span><span class="to">Mocktails</span><span class="eg">Athletic Brewing, Recess, Ghia</span></div>
+      <div class="sw"><span class="from">Soda</span><span class="to">Prebiotic soda</span><span class="eg">Pepsi paid $1.95B for Poppi</span></div>
+      <div class="sw"><span class="from">Energy drinks</span><span class="to">"Healthy" energy</span><span class="eg">Celsius, $2.5B a year</span></div>
+      <div class="sw hi"><span class="from">Nicotine</span><span class="to">Health pouches?</span><span class="eg">The rest of this game.</span></div>
+    </div><p class="lead" style="margin:18px 0 0">Same habit. <b>Healthier label. Higher price.</b></p>`,
+  money: () => { const qs = LEVELS.find(L=>L.id==="money").qs;
+    return `<div class="kick px">CPG 101</div><h2 class="an">Where your $5.95 goes</h2>
+    <div class="wf"><div style="width:35%;background:#ff4a3a"><span class="k">Store</span><span class="v">$2.08</span></div>
+      <div style="width:16.3%;background:#ffb020"><span class="k">Truck</span><span class="v">$0.97</span></div>
+      <div style="width:48.7%;background:#2fe07a"><span class="k">Brand</span><span class="v">$2.90</span></div></div>
+    <p class="lead">${qs.map((q,i)=>st.g[q.id]!=null ? `You said ${["store","truck","brand"][i]} ${fmtVal(q,st.g[q.id])}` : "").filter(Boolean).join(" · ")}</p>
+    <p class="lead">The store makes almost <b>as much as the brand</b>. Out of its $2.90 the brand still pays to make it, ship it and run promos (15–30% of sales). That's why CPG needs volume.</p>`; },
+  habit: () => bars("habit", "One customer, one year", "Nicotine brings people back <b>15 times a day.</b> Health pouches cap out at 4. That gap is the whole business."),
+  margin: () => bars("margin", "Who keeps the most?", "Pouches are <b>tiny, light and cheap to ship</b>. That's how ZYN out-margins Coke. The bet on health pouches is that margin without the nicotine."),
+  mult: () => bars("mult", "Habits get the premium", "Soda people love: <b>~4x sales.</b> A pouch people can't put down: <b>~8.7x.</b>"),
+};
+function bars(id, title, lead) {
+  const L = LEVELS.find(L=>L.id===id), top = id === "margin" ? 100 : Math.max(...L.qs.map(q=>q.ans)) * 1.1;
+  const col = k => ["Monster","PMI","ZYN","Neutonic","Ultra"].includes(k) ? SUBJ[k].fg : SUBJ[k].bg;
+  return `<div class="kick px">${L.name}</div><h2 class="an">${title}</h2><p class="lead">${lead}</p>
+    <div class="hbars">${L.qs.map(q => { const g = st.g[q.id];
+      return `<div class="hb"><div class="lab"><span>${nameOf(q.s)}</span><span>${q.show || fmtVal(q,q.ans)}</span></div>
+        <div class="track"><div class="fill" data-w="${q.ans/top*100}" style="background:${col(q.s)}"></div>${g!=null?`<div class="mk" style="left:${Math.min(99,g/top*100)}%"></div>`:""}</div>
+        ${g!=null?`<div class="you">You said ${esc(fmtVal(q,g))}</div>`:""}</div>`; }).join("")}</div>`;
+}
+function renderInsight(s) {
+  app.innerHTML = `<section class="panel">${INS[s.L.id]()}<div class="row"><button class="btn" id="go" type="button">Next ▶</button></div></section>`;
+  document.getElementById("go").onclick = next;
+  requestAnimationFrame(() => requestAnimationFrame(() => app.querySelectorAll(".fill").forEach(f => f.style.width = f.dataset.w + "%")));
+}
+
+function renderClear(s) {
+  const L = s.L, upto = LEVELS.slice(0, s.li+1), tot = upto.reduce((t,M)=>t+lvlPts(M),0), mx = upto.reduce((t,M)=>t+levelMax(M),0);
+  app.innerHTML = `<section class="panel"><div class="kick px">${L.boss ? "Boss fight over" : "Level clear"}</div><h2 class="an">${L.name}</h2>
+    <div class="rows"><div class="rw hd"><span>Who</span><span>You</span><span>Answer</span><span style="text-align:right">Pts</span></div>
+    ${L.qs.map(q => { const g = st.g[q.id], p = score(q,g);
+      return `<div class="rw">${chip(q.pick==="brands" ? q.ans : q.s)}<span class="g">${g==null?"—":esc(fmtVal(q,g))}</span><span>${q.pick==="brands" ? "✓" : (q.show||fmtVal(q,q.ans))}</span><span class="p" style="color:${p==null?"var(--dim)":VCOL[p/(q.x||1)]}">+${p||0}</span></div>`; }).join("")}</div>
+    <div class="tot"><span class="v">${lvlPts(L)}<span style="font-size:.5em;opacity:.6">/${levelMax(L)}</span></span><span class="d">CPG IQ so far ${tot}/${mx}<br>Rank: ${rankOf(tot)}</span></div>
+    <div class="row"><button class="btn" id="go" type="button">${s.li === LEVELS.length-1 ? "See my rank ▶" : "Next level ▶"}</button></div></section>`;
+  document.getElementById("go").onclick = next;
+}
+
+function renderFinal() {
+  const tot = total(), r = rankOf(tot), rt = reidTotal();
+  const line = `I scored ${tot}/${MAXPTS} on the pouch CPG game (${r})${hasReid ? ` — Reid got ${rt}` : ""}. Beat that.`;
+  app.innerHTML = `<section class="panel"><div class="kick px">Final CPG IQ</div>
+    <p class="score-big an">${tot}<small>/${MAXPTS}</small></p>
+    <div class="kick px" style="color:var(--dim)">Your rank</div><p class="rank an">${r}</p>
+    <div class="ladder">${RANKS.map(([n,t])=>`<div class="px ${n===r?"me":""}"><span>${n}</span><span>${Math.ceil(t*MAXPTS)}+</span></div>`).join("")}</div>
+    ${hasReid ? `<p class="lead">Reid scored <b>${rt}</b> (${rankOf(rt)}). ${tot > rt ? "<b>You beat him.</b>" : tot === rt ? "<b>Dead tie.</b>" : "He wins this one."}</p>` : ""}
+    <div class="kick px">Paste this in the comments</div>
+    <div class="share" id="share">${esc(line)}</div>
+    <div class="row"><button class="btn" id="copy" type="button">Copy my score</button><button class="btn ghost" id="again" type="button">Play again</button></div>
+    <p class="note">Numbers come from public filings, brand stores and reported figures. The $6 split is an industry rule of thumb.</p></section>`;
+  document.getElementById("copy").onclick = async e => {
+    try { await navigator.clipboard.writeText(line); e.target.textContent = "Copied"; }
+    catch (err) { const r = document.createRange(); r.selectNodeContents(document.getElementById("share")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); e.target.textContent = "Selected — copy it"; }
+  };
+  document.getElementById("again").onclick = () => { st = { i:0, g:{}, done:{} }; persist(); render(); };
+}
+
+render();
+</script>
