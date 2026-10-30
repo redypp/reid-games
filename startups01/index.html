@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="10 hidden startups, 3 clues each. Did it live or die? Lock in early for more points.">
+<title>Lived or Died</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme:dark; --night:#0b0d17; --ink:#f4f1ea; --dim:#8a8fa8; --neon:#ffd23f; --live:#2fe07a; --dead:#ff4a3a; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; background:#000; overflow:hidden; }
+  body { font-family:"Archivo","Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+  .px { font-family:"Press Start 2P",monospace; letter-spacing:.04em; }
+  .an { font-family:"Anton",Impact,sans-serif; text-transform:uppercase; line-height:.9; }
+
+  #stage { position:fixed; left:50%; top:50%; width:1920px; height:1080px; overflow:hidden; transform-origin:center;
+    background:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0/64px 64px,
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/64px 64px,
+      radial-gradient(1300px 760px at 50% 45%, #1c2244, #0b0d17 70%); }
+  #stage::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:20;
+    background:repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.10) 3px 4px); }
+
+  /* ---------- HUD ---------- */
+  .hud { position:absolute; left:0; right:0; top:0; height:96px; z-index:10; display:flex; align-items:center; justify-content:space-between;
+    padding:0 44px; background:linear-gradient(#090b14, rgba(9,11,20,.85)); border-bottom:2px solid rgba(255,255,255,.08); }
+  .hud .iq { display:flex; align-items:center; gap:18px; min-width:420px; }
+  .hud .iq .k { font-size:15px; color:var(--neon); }
+  .hud .iq .v { font-family:"Anton",Impact,sans-serif; font-size:62px; line-height:1; color:#fff; min-width:90px; }
+  .hud .iq .v.bump { animation:bump .5s ease-out; }
+  .hud .iq .of { font-size:13px; color:var(--dim); }
+  .hud .mid { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .hud .lvl { font-size:13px; color:#fff; }
+  .hud .pips { display:flex; gap:8px; }
+  .hud .pip { width:40px; height:12px; border-radius:6px; background:rgba(255,255,255,.13); }
+  .hud .pip.ok { background:var(--live); } .hud .pip.no { background:var(--dead); }
+  .hud .pip.cur { background:var(--neon); box-shadow:0 0 16px var(--neon); }
+  .hud .right { display:flex; gap:14px; min-width:420px; justify-content:flex-end; }
+  .chipx { font-size:13px; padding:12px 16px; border-radius:10px; background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.12); }
+  .chipx.fire { background:#ff5a1f; border-color:#ffb38f; color:#fff; box-shadow:0 0 20px rgba(255,90,31,.6); }
+  .chipx.rank { color:var(--neon); }
+  @keyframes bump { 0% { transform:scale(1); color:#fff; } 30% { transform:scale(1.35); color:var(--neon); } 100% { transform:scale(1); color:#fff; } }
+
+  /* ---------- screens ---------- */
+  .scr { position:absolute; left:0; right:0; top:96px; bottom:0; display:none; perspective:2200px; }
+  .scr.on { display:block; }
+  .scr.full { top:0; z-index:15; }
+  .panel { position:absolute; left:56px; right:56px; top:30px; bottom:46px; border-radius:40px; background:#121633; overflow:hidden;
+    box-shadow:0 18px 0 rgba(0,0,0,.45), inset 0 0 0 4px rgba(255,255,255,.1); }
+  .scr.on .panel { animation:cardIn .5s cubic-bezier(.2,1.35,.4,1); }
+  .panel .kick { position:absolute; left:64px; top:52px; font-size:16px; color:var(--neon); }
+  .panel h2 { position:absolute; left:64px; top:96px; font-size:120px; color:#fff; }
+  @keyframes cardIn { from { transform:translateY(60px) scale(.94); opacity:0; } to { transform:none; opacity:1; } }
+  @keyframes slam { from { transform:scale(1.8) rotate(-4deg); opacity:0; } to { transform:none; opacity:1; } }
+  @keyframes blink { 50% { opacity:0; } }
+  @keyframes float { 50% { translate:0 -14px; } }
+  @keyframes pulse { 50% { transform:scale(1.12); } }
+
+  /* title */
+  .title { background:radial-gradient(1200px 700px at 30% 40%, #3a1622, #0b0d17 70%); }
+  .title .k { position:absolute; left:110px; top:120px; font-size:22px; color:var(--neon); }
+  .title h1 { position:absolute; left:100px; top:180px; font-size:230px; color:#fff; text-shadow:0 14px 0 rgba(0,0,0,.4); }
+  .title h1 .l { color:var(--live); } .title h1 .d { color:var(--dead); }
+  .title .sub { position:absolute; left:110px; top:690px; font-size:44px; font-weight:900; color:#fff; }
+  .title .press { position:absolute; left:110px; bottom:110px; font-size:22px; color:#fff; animation:blink 1.1s steps(2) infinite; }
+  .title .stones { position:absolute; right:110px; top:190px; display:flex; gap:30px; align-items:flex-end; }
+  .stone { width:230px; height:300px; border-radius:115px 115px 14px 14px; background:#3a3f55; box-shadow:inset 0 -14px 0 rgba(0,0,0,.3), 0 24px 40px rgba(0,0,0,.5);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:#c9cde0; animation:float 4s ease-in-out infinite; }
+  .stone b { font-family:"Anton",Impact,sans-serif; font-size:76px; } .stone span { font-size:14px; }
+  .trophy { width:230px; height:360px; border-radius:24px; background:var(--live); color:#0b2a17; box-shadow:inset 0 -14px 0 rgba(0,0,0,.2), 0 24px 40px rgba(0,0,0,.5);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; animation:float 4s 1s ease-in-out infinite; }
+  .trophy b { font-family:"Anton",Impact,sans-serif; font-size:64px; text-align:center; line-height:.95; } .trophy span { font-size:14px; }
+
+  /* rules */
+  .rules { position:absolute; left:64px; right:64px; top:270px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .rule { border-radius:28px; background:#1c2148; padding:36px; height:380px; display:flex; flex-direction:column; justify-content:space-between; opacity:0; transform:translateY(30px); }
+  .scr.on .rule { animation:up .5s ease-out forwards; }
+  .scr.on .rule:nth-child(2) { animation-delay:.25s; } .scr.on .rule:nth-child(3) { animation-delay:.5s; }
+  @keyframes up { to { opacity:1; transform:none; } }
+  .rule .n { font-size:16px; color:var(--neon); }
+  .rule .t { font-family:"Anton",Impact,sans-serif; font-size:84px; text-transform:uppercase; color:#fff; line-height:.95; }
+  .rule .p { font-family:"Anton",Impact,sans-serif; font-size:120px; color:var(--neon); line-height:1; }
+  .rule .e { font-size:26px; font-weight:700; color:var(--dim); line-height:1.3; }
+  .rules-foot { position:absolute; left:64px; right:64px; bottom:60px; font-family:"Anton",Impact,sans-serif; font-size:60px; text-transform:uppercase; color:#fff; }
+  .rules-foot em { font-style:normal; color:var(--neon); }
+
+  /* round splash */
+  .splash { overflow:hidden; }
+  .splash .stripes { position:absolute; inset:-200px; background:repeating-linear-gradient(-45deg, var(--lc) 0 46px, var(--lc2) 46px 92px); animation:slide 3s linear infinite; }
+  @keyframes slide { to { transform:translate(130px,0); } }
+  .splash .inner { position:absolute; left:120px; right:120px; top:110px; }
+  .splash .lv { font-size:26px; color:#111; background:#fff; display:inline-block; padding:14px 18px; border-radius:10px; box-shadow:0 8px 0 rgba(0,0,0,.35); }
+  .splash-t { font-size:280px; color:#fff; margin-top:34px; text-shadow:0 12px 0 rgba(0,0,0,.35); }
+  .scr.on .splash-t { animation:slam .55s cubic-bezier(.2,1.5,.4,1); }
+  .splash .sub { font-size:46px; font-weight:900; color:#fff; margin-top:26px; text-shadow:0 4px 0 rgba(0,0,0,.3); }
+  .map { position:absolute; left:120px; right:120px; bottom:60px; height:150px; }
+  .map .line { position:absolute; left:40px; right:40px; top:38px; height:10px; border-radius:5px; background:rgba(0,0,0,.35); }
+  .map .nodes { position:absolute; inset:0; display:flex; justify-content:space-between; }
+  .map .n { width:86px; display:flex; flex-direction:column; align-items:center; gap:14px; position:relative; }
+  .map .n b { width:86px; height:86px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:"Press Start 2P"; font-size:18px;
+    background:#1b1f35; color:#777; border:6px solid rgba(0,0,0,.35); }
+  .map .n.ok b { background:var(--live); color:#0b2a17; } .map .n.no b { background:var(--dead); color:#2a0b0b; }
+  .map .n.cur b { background:#fff; color:#111; box-shadow:0 0 0 8px var(--neon), 0 0 40px #fff; animation:pulse 1.2s ease-in-out infinite; }
+  .map .n.boss b { border-color:var(--neon); }
+  .map .n span { font-size:11px; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.5); white-space:nowrap; }
+
+  /* clue screen: a case file */
+  .file { position:absolute; left:56px; right:56px; top:30px; bottom:46px; border-radius:40px; background:#efe6d2; color:#1a1712; overflow:hidden;
+    box-shadow:0 18px 0 rgba(0,0,0,.45), inset 0 0 0 4px rgba(0,0,0,.08); }
+  .scr.on.c1 .file { animation:cardIn .5s cubic-bezier(.2,1.35,.4,1); }
+  .file .tab { position:absolute; left:64px; top:46px; display:flex; gap:14px; align-items:center; }
+  .file .tab span { font-size:14px; padding:10px 14px; border-radius:8px; background:#1a1712; color:#efe6d2; }
+  .file .tab span.ol { background:transparent; color:#1a1712; border:2px solid #1a1712; }
+  .file .tab span.x2 { background:var(--neon); color:#111; }
+  .file .codename { position:absolute; left:60px; top:104px; font-size:120px; color:#1a1712; }
+  .file .codename em { font-style:normal; color:#b8ad95; }
+  .clues { position:absolute; left:64px; top:250px; width:1130px; display:flex; flex-direction:column; gap:22px; }
+  .clue { border-radius:22px; padding:26px 32px; background:#fff; box-shadow:0 6px 0 rgba(0,0,0,.12); }
+  .clue .h { display:flex; gap:16px; align-items:center; font-size:13px; color:#8a826f; margin-bottom:14px; }
+  .clue .h i { font-style:normal; background:#1a1712; color:#fff; padding:6px 10px; border-radius:6px; }
+  .clue .b { font-size:34px; font-weight:700; line-height:1.24; }
+  .clue.old { background:rgba(255,255,255,.5); box-shadow:none; }
+  .clue.old .b { font-size:25px; color:#5a5446; }
+  .clue.new { box-shadow:0 0 0 6px var(--neon), 0 10px 0 rgba(0,0,0,.15); }
+  .scr.on .clue.new { animation:clueIn .45s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes clueIn { from { transform:translateX(-40px) scale(.96); opacity:0; } to { transform:none; opacity:1; } }
+  .picks { position:absolute; right:64px; top:250px; width:540px; display:flex; flex-direction:column; gap:24px; }
+  .pk { height:200px; border-radius:30px; display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:relative;
+    font-family:"Anton",Impact,sans-serif; font-size:110px; text-transform:uppercase; box-shadow:0 12px 0 rgba(0,0,0,.3); transition:all .25s; cursor:pointer; }
+  .pk .key { font-family:"Press Start 2P"; font-size:22px; width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.25); color:#fff; }
+  .pk.live { background:var(--live); color:#0b2a17; } .pk.dead { background:var(--dead); color:#2a0b0b; }
+  .pk.pick { transform:scale(1.05); box-shadow:0 0 0 10px #1a1712, 0 0 0 18px var(--neon), 0 16px 0 rgba(0,0,0,.3); }
+  .pk.off { opacity:.18; filter:grayscale(1); }
+  .worth { text-align:center; font-size:15px; color:#5a5446; margin-top:6px; line-height:1.8; }
+  .worth b { font-family:"Anton",Impact,sans-serif; font-size:64px; color:#1a1712; display:block; letter-spacing:0; }
+  .lockbadge { display:none; text-align:center; font-size:15px; padding:18px; border-radius:16px; background:#1a1712; color:var(--neon); line-height:1.7; }
+  .locked .lockbadge { display:block; } .locked .worth { display:none; }
+  .nudge { animation:nudge .4s; }
+  @keyframes nudge { 20%,60% { transform:translateX(-12px); } 40%,80% { transform:translateX(12px); } }
+
+  /* reveal */
+  .rv { position:absolute; left:56px; right:56px; top:30px; bottom:46px; border-radius:40px; background:var(--b); color:var(--f); overflow:hidden;
+    box-shadow:0 18px 0 rgba(0,0,0,.45), inset 0 0 0 4px rgba(255,255,255,.16); }
+  .scr.on .rv { animation:flip .6s cubic-bezier(.2,1.2,.4,1); }
+  @keyframes flip { from { transform:rotateY(-80deg) scale(.95); opacity:.2; } to { transform:none; opacity:1; } }
+  .rv .tag { position:absolute; left:64px; top:52px; display:flex; gap:14px; }
+  .rv .tag span { font-size:14px; padding:10px 14px; border-radius:8px; background:var(--f); color:var(--b); }
+  .rv .tag span.ol { background:transparent; color:var(--f); border:2px solid var(--f); }
+  .rv .was { position:absolute; left:64px; top:126px; font-size:18px; opacity:.8; }
+  .rv .name { position:absolute; left:56px; top:170px; font-size:220px; white-space:nowrap; }
+  .rv .name.l { font-size:170px; }
+  .scr.on .rv .name { animation:slam .55s .25s cubic-bezier(.2,1.5,.4,1) backwards; }
+  .rv .yrs { position:absolute; left:64px; top:400px; font-size:22px; opacity:.85; }
+  .rv .stat { position:absolute; left:64px; top:470px; width:1120px; font-family:"Anton",Impact,sans-serif; font-size:110px; text-transform:uppercase; line-height:.95; }
+  .rv .stat small { display:block; font-family:"Press Start 2P"; font-size:15px; margin-bottom:16px; opacity:.8; letter-spacing:.04em; }
+  .rv .story { position:absolute; left:64px; top:700px; width:1120px; font-size:36px; font-weight:700; line-height:1.28; opacity:0; transform:translateY(16px); transition:all .45s ease-out; }
+  .rv .story.show { opacity:1; transform:none; }
+  .rv .src { position:absolute; left:64px; bottom:36px; font-size:12px; opacity:.6; }
+  .fate { position:absolute; right:110px; top:120px; width:520px; height:520px; display:flex; align-items:center; justify-content:center; opacity:0; z-index:2; }
+  .fate.show { opacity:1; animation:fate .4s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes fate { from { transform:scale(2.2) rotate(-10deg); opacity:0; } to { transform:none; opacity:1; } }
+  .fate .stone { width:400px; height:500px; border-radius:200px 200px 20px 20px; animation:none; background:#454a60; color:#e8eaf3; border:8px solid #2b2f40; }
+  .fate .stone b { font-size:150px; } .fate .stone span { font-size:20px; }
+  .fate .trophy { width:440px; height:440px; border-radius:50%; animation:none; border:10px solid #0b2a17; transform:rotate(-8deg); }
+  .fate .trophy b { font-size:110px; } .fate .trophy span { font-size:18px; }
+  .you { position:absolute; right:110px; top:690px; width:520px; display:flex; font-weight:900; font-size:30px; text-transform:uppercase; opacity:0; z-index:3; }
+  .you.show { opacity:1; animation:fate .35s cubic-bezier(.2,1.6,.4,1); }
+  .you span { padding:16px 22px; } .you .me { background:var(--f); color:var(--b); border-radius:14px 0 0 14px; flex:1; } .you .vd { color:#111; border-radius:0 14px 14px 0; }
+  .plus { position:absolute; right:180px; top:560px; font-family:"Anton",Impact,sans-serif; font-size:150px; color:var(--neon); opacity:0; z-index:4; text-shadow:0 8px 0 rgba(0,0,0,.35); }
+  .plus.show { animation:plus 1.4s ease-out forwards; }
+  @keyframes plus { 0% { opacity:0; transform:translateY(40px) scale(.6); } 20% { opacity:1; transform:none; } 75% { opacity:1; } 100% { opacity:0; transform:translateY(-120px); } }
+  .shake { animation:shake .4s !important; }
+  @keyframes shake { 20%,60% { transform:translateX(-14px); } 40%,80% { transform:translateX(14px); } }
+  .confetti { position:absolute; inset:0; pointer-events:none; z-index:5; overflow:hidden; }
+  .confetti i { position:absolute; top:-30px; width:16px; height:26px; border-radius:3px; animation:fall var(--t) cubic-bezier(.3,.6,.5,1) forwards; }
+  @keyframes fall { to { transform:translate(var(--dx), 1100px) rotate(var(--r)); opacity:.9; } }
+
+  /* scoreboard */
+  .rows { position:absolute; left:64px; top:250px; width:1150px; }
+  .r { display:grid; grid-template-columns:330px 1fr 1fr 1fr 110px; align-items:center; gap:16px; height:104px; border-bottom:2px solid rgba(255,255,255,.12); font-size:32px; font-weight:900; color:#fff; }
+  .r.hd { height:50px; font-size:12px; color:var(--dim); font-family:"Press Start 2P"; }
+  .r .g { color:var(--dim); }
+  .r .pp { text-align:right; font-family:"Anton",Impact,sans-serif; font-size:50px; }
+  .r .pp.p0 { color:var(--dead); } .r .pp.p1 { color:#ffb020; } .r .pp.p2 { color:#9be86b; } .r .pp.p3 { color:var(--live); }
+  .chip { display:inline-flex; font-family:"Anton",Impact,sans-serif; font-size:38px; text-transform:uppercase; padding:6px 16px; border-radius:10px; justify-self:start; white-space:nowrap; }
+  .fl { font-family:"Anton",Impact,sans-serif; font-size:40px; text-transform:uppercase; } .fl.L { color:var(--live); } .fl.D { color:var(--dead); }
+  .tot { position:absolute; right:64px; top:250px; width:480px; border-radius:28px; background:var(--neon); color:#111; padding:34px 36px; box-shadow:0 12px 0 rgba(0,0,0,.4); }
+  .tot .k { font-size:14px; }
+  .tot .v { font-family:"Anton",Impact,sans-serif; font-size:150px; line-height:1; margin-top:14px; }
+  .tot .v small { font-size:60px; opacity:.6; }
+  .tot .d { font-weight:900; font-size:26px; margin-top:18px; padding-top:18px; border-top:3px solid rgba(0,0,0,.2); text-transform:uppercase; line-height:1.35; }
+
+  /* graveyard vs survivors */
+  .yard { position:absolute; left:64px; right:64px; top:250px; display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  .yard h3 { font-size:18px; margin-bottom:22px; } .yard .dh { color:var(--dead); } .yard .lh { color:var(--live); }
+  .yard .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .tile { width:146px; height:200px; border-radius:75px 75px 12px 12px; background:#3a3f55; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    padding-bottom:22px; gap:10px; position:relative; opacity:0; transform:translateY(30px); }
+  .tile.w { border-radius:20px; background:#1d4a32; }
+  .scr.on .tile { animation:up .45s ease-out forwards; }
+  .tile b { font-family:"Anton",Impact,sans-serif; font-size:30px; text-transform:uppercase; color:#fff; text-align:center; line-height:.95; padding:0 8px; }
+  .tile span { font-size:10px; color:#c9cde0; }
+  .tile .mk { position:absolute; top:-16px; right:-12px; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:"Anton",Impact,sans-serif; font-size:30px; color:#111; border:4px solid #121633; }
+  .yard-foot { position:absolute; left:64px; right:64px; bottom:60px; font-family:"Anton",Impact,sans-serif; font-size:56px; text-transform:uppercase; color:#fff; }
+  .yard-foot em { font-style:normal; color:var(--neon); }
+
+  /* final */
+  .ladder { position:absolute; right:64px; top:110px; width:520px; display:flex; flex-direction:column-reverse; gap:14px; }
+  .ladder div { font-size:18px; padding:22px 24px; border-radius:16px; background:rgba(255,255,255,.06); color:var(--dim); display:flex; justify-content:space-between; }
+  .ladder div.me { background:var(--neon); color:#111; transform:scale(1.06); box-shadow:0 0 40px rgba(255,210,63,.6); }
+  .fin-k { position:absolute; left:64px; top:110px; font-size:18px; color:var(--neon); }
+  .fin-v { position:absolute; left:52px; top:150px; font-size:300px; color:#fff; }
+  .fin-v small { font-size:110px; color:var(--dim); }
+  .fin-r { position:absolute; left:64px; top:500px; font-size:44px; font-weight:900; color:var(--dim); text-transform:uppercase; }
+  .fin-rank { position:absolute; left:52px; top:560px; font-size:180px; color:var(--neon); text-shadow:0 0 50px rgba(255,210,63,.5); white-space:nowrap; }
+  .scr.on .fin-rank { animation:slam .6s .3s cubic-bezier(.2,1.5,.4,1) backwards; }
+  .fin-c { position:absolute; left:64px; bottom:60px; font-size:16px; color:#fff; animation:blink 1.1s steps(2) infinite; }
+
+  /* cheat sheet: a screen before round 1, and an overlay (H) during clues */
+  .cheat { position:absolute; left:64px; right:64px; top:250px; display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+  .cheat .col { border-radius:28px; padding:30px 34px; display:flex; flex-direction:column; gap:20px; }
+  .cheat .col.red { background:#2a1520; box-shadow:inset 0 0 0 4px rgba(255,74,58,.5); }
+  .cheat .col.grn { background:#122a20; box-shadow:inset 0 0 0 4px rgba(47,224,122,.5); }
+  .cheat h3 { font-size:16px; } .cheat .red h3 { color:var(--dead); } .cheat .grn h3 { color:var(--live); }
+  .cheat .tip { display:grid; grid-template-columns:44px 1fr; gap:14px; align-items:start; }
+  .cheat .tip i { font-style:normal; font-family:"Anton",Impact,sans-serif; font-size:40px; line-height:1; }
+  .cheat .red .tip i { color:var(--dead); } .cheat .grn .tip i { color:var(--live); }
+  .cheat .tip b { display:block; font-family:"Anton",Impact,sans-serif; font-size:40px; text-transform:uppercase; color:#fff; line-height:1; }
+  .cheat .tip span { display:block; font-size:22px; font-weight:700; color:#c9cde0; line-height:1.3; margin-top:6px; }
+  .cheat-foot { position:absolute; left:64px; right:64px; bottom:50px; font-family:"Anton",Impact,sans-serif; font-size:48px; text-transform:uppercase; color:#fff; line-height:1; }
+  .cheat-foot em { font-style:normal; color:var(--neon); }
+  .hintkey { position:absolute; right:64px; bottom:28px; font-size:12px; color:#8a826f; }
+  #cheatlay { position:absolute; inset:0; z-index:18; background:rgba(8,10,20,.94); display:none; }
+  #cheatlay.on { display:block; animation:cardIn .3s ease-out; }
+  #cheatlay .panel { background:#121633; }
+  /* money + ending rounds */
+  .rule .e { font-size:27px; color:#d5d8ea; }
+  .rule { height:380px; } .rules-foot { font-size:50px; }
+  .cheat .col.ylw { background:#2a2614; box-shadow:inset 0 0 0 4px rgba(255,210,63,.5); }
+  .cheat .col.blu { background:#10263a; box-shadow:inset 0 0 0 4px rgba(79,209,255,.5); }
+  .cheat .ylw h3, .cheat .ylw .tip i { color:var(--neon); } .cheat .blu h3, .cheat .blu .tip i { color:#4fd1ff; }
+  .clues { top:236px; gap:16px; }
+  .clue { padding:18px 26px; }
+  .clue .h { margin-bottom:10px; font-size:12px; }
+  .clue .b { font-size:34px; }
+  .clue.mid .b { font-size:30px; }
+  .clue.old { padding:12px 26px; } .clue.old .b { font-size:22px; } .clue.old .h { margin-bottom:6px; }
+  .amt { font-size:110px; color:#1a1712; margin-bottom:8px; }
+  .old .amt { font-size:52px; margin-bottom:4px; }
+  .mres { font-size:12px; padding:6px 10px; border-radius:6px; }
+  .mres.ok { background:var(--live); color:#0b2a17; } .mres.no { background:var(--dead); color:#2a0b0b; }
+  .picks { top:210px; gap:18px; }
+  .callq { text-align:center; font-size:15px; color:#5a5446; }
+  .pk { height:176px; }
+  .pk.sm { font-size:70px; flex-wrap:wrap; align-content:center; line-height:1; }
+  .pk.sm small { font:900 22px "Archivo",sans-serif; text-transform:none; width:100%; order:3; margin-top:6px; }
+  .pk.big { background:var(--neon); color:#2a2206; } .pk.small { background:#4fd1ff; color:#07263a; }
+  .worth b { display:inline; font-size:48px; margin-left:10px; vertical-align:middle; }
+  .rv .name { top:150px; font-size:190px; } .rv .name.l { font-size:150px; }
+  .stats { position:absolute; left:64px; top:350px; width:1120px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .st { border-radius:20px; padding:20px 24px; min-height:164px; background:rgba(0,0,0,.24); color:#fff; opacity:0; }
+  .st span { display:block; font-size:13px; opacity:.85; margin-bottom:14px; }
+  .st b { font-family:"Anton",Impact,sans-serif; font-size:58px; font-weight:400; text-transform:uppercase; line-height:1; }
+  .st.now { background:#fff; color:#111; box-shadow:0 0 0 6px var(--neon); }
+  .scr.on .st { animation:slam .4s cubic-bezier(.2,1.5,.4,1) forwards; }
+  .scr.on .st:nth-child(1) { animation-delay:.5s; } .scr.on .st:nth-child(2) { animation-delay:1.1s; } .scr.on .st:nth-child(3) { animation-delay:1.8s; }
+  .roast { position:absolute; left:64px; top:560px; width:1120px; font-size:68px; line-height:1; opacity:0; transform:translateY(16px); transition:all .4s ease-out; }
+  .roast.show, .rv .story.show { opacity:1; transform:none; }
+  .rv .story { top:710px; font-size:32px; }
+  .fate { top:100px; width:480px; height:480px; right:90px; }
+  .fate .stone { width:340px; height:430px; border-radius:170px 170px 20px 20px; } .fate .stone b { font-size:120px; }
+  .fate .trophy { width:380px; height:380px; } .fate .trophy b { font-size:92px; } .fate .trophy span { font-size:13px; text-align:center; }
+  .you { top:610px; right:90px; width:480px; }
+  .plus { top:440px; }
+  .r { grid-template-columns:300px 1fr .8fr 1fr 90px; font-size:26px; }
+  .r .fl { font-size:30px; } .r .g { font-size:22px; }
+  #help { position:fixed; bottom:8px; left:10px; color:#777; font:12px Helvetica; z-index:30; }
+</style>
+</head>
+<body>
+
+
+<div id="stage"></div>
+<div id="help">→ / space next · A = top button · D = bottom button · H = cheat sheet · ← back · F fullscreen · R restart</div>
+
+<a href="../" style="position:fixed;right:12px;top:12px;z-index:50;font:900 12px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#f4f1ea;background:rgba(0,0,0,.55);padding:9px 12px;text-decoration:none;border-radius:6px">&larr; All games</a>
+<script>
+// Fates + numbers are reported figures, checked Oct 2026; sources in SCRIPT.md. Names stay hidden until each reveal.
+// big = raised $50M+ all-time. fate: L lived, D died.
+const ROUNDS = [
+  { id:"juicero", name:"Juicero", big:true, fate:"D", yrs:"2013 – 2017", bg:"#5fae3e", fg:"#ffffff", lc:"#5fae3e", lc2:"#4b9630",
+    what:"A $699 Wi-Fi juicer. It presses fresh juice out of packs of pre-chopped fruit and veg.",
+    pays:"Sell you the machine, then sell you packs every week. Like a printer and ink.",
+    why:"Fresh juice at home with no cleanup, for people already paying a lot for fancy bottles.",
+    raised:"$120M", money:"Investors included Google's venture arm and Kleiner Perkins, early backers of Google and Amazon.",
+    twist:"Reporters found you could squeeze the packs with your bare hands and get basically the same juice.",
+    mid:["Sold for","$699, then $399"], today:"$0. Gone.",
+    roast:"You already owned the machine. They're called hands.",
+    story:"Bloomberg's hand-squeeze video went viral in April 2017. It shut down that September and refunded buyers.",
+    src:"Bloomberg · The Guardian · 2017" },
+  { id:"scrub", name:"Scrub Daddy", big:false, fate:"L", yrs:"2012 – now", bg:"#ffd400", fg:"#13306b", lc:"#e8b800", lc2:"#d1a600",
+    what:"A kitchen sponge shaped like a smiley face. Stiff in cold water, soft in hot water.",
+    pays:"Sell sponges for a few bucks each, in stores and on TV.",
+    why:"Everybody needs a sponge, and nobody had made one interesting.",
+    raised:"$200K", money:"One Shark Tank deal, for 20% of the company.",
+    twist:"The foam was invented for buffing cars. The founder sold that company to 3M, and the leftover foam sat in his garage for years.",
+    mid:["Lifetime sales","$670M+ (est.)"], today:"Still selling",
+    roast:"A sponge outlasted most of Silicon Valley.",
+    story:"The biggest deal in Shark Tank history, and it's still private. Exact sales aren't public, so every number is an estimate.",
+    src:"Looper · Business Insider · estimates vary" },
+  { id:"zume", name:"Zume Pizza", big:true, fate:"D", yrs:"2015 – 2023", bg:"#e8412c", fg:"#ffffff", lc:"#e8412c", lc2:"#c8301d",
+    what:"Robots make your pizza. Then it bakes inside the truck on the way to your house.",
+    pays:"Sell pizza with fewer workers and no restaurant rent.",
+    why:"Take out the people and the real estate, and you've got a cheaper, hotter Domino's.",
+    raised:"$420M+", money:"SoftBank wrote one $375M check in 2018, valuing it at $2.25 billion.",
+    twist:"In 2020 it stopped making pizza completely and started making compostable food packaging.",
+    mid:["Peak value","$2.25B"], today:"$0. Gone.",
+    roast:"From robot pizza to cardboard boxes.",
+    story:"The packaging pivot didn't save it. A plan to go public fell through, and it shut down in mid-2023.",
+    src:"Bloomberg · Nation's Restaurant News · 2023" },
+  { id:"washio", name:"Washio", big:false, fate:"D", yrs:"2013 – 2016", bg:"#2a7de1", fg:"#ffffff", lc:"#2a7de1", lc2:"#1c66c2",
+    what:"Uber for laundry. Tap an app, a driver grabs your dirty clothes, and brings them back clean.",
+    pays:"Charge per load.",
+    why:"City people hate doing laundry, and Uber had just proved on-demand apps could explode.",
+    raised:"~$17M", money:"Four funding rounds. Small by Silicon Valley standards.",
+    twist:"Every order needs a driver twice: once for pickup, once for drop-off. That's a lot of driving for one bag of laundry.",
+    mid:["Lasted","About 3 years"], today:"$0. Gone.",
+    roast:"Hung out to dry.",
+    story:"It shut down overnight in August 2016 after talks to sell the company went nowhere. A rival bought what was left.",
+    src:"TechCrunch · Aug 2016" },
+  { id:"ring", name:"Ring", was:"Pitched as DoorBot", big:true, fate:"L", yrs:"2013 – now", bg:"#1c9ad6", fg:"#ffffff", lc:"#1c9ad6", lc2:"#1282bb",
+    what:"A doorbell with a camera. When someone's at the door, it video-calls your phone.",
+    pays:"Sell the doorbell, then charge a small monthly fee to save your videos.",
+    why:"Stolen packages, and wanting to see who's there. The founder built it in his garage.",
+    raised:"~$209M", money:"Kleiner Perkins and Richard Branson invested, after every shark on Shark Tank said no.",
+    twist:"Sales jumped after the Shark Tank episode aired, even with no deal.",
+    mid:["Sold to Amazon","About $1B"], today:"Amazon owns it",
+    roast:"The sharks passed. Amazon answered the door.",
+    story:"The founder left Amazon in 2023 and came back in April 2025 to run the doorbell business again.",
+    src:"CNBC · Fortune · reported purchase price" },
+  { id:"irl", name:"IRL", big:true, fate:"D", yrs:"Shut down 2023", bg:"#6c4cff", fg:"#ffffff", lc:"#6c4cff", lc2:"#5636e6",
+    what:"A social app for making plans with friends. Group chats built around real-life events.",
+    pays:"Get huge first, make money from it later.",
+    why:"Gen Z was tired of scrolling and wanted to actually hang out.",
+    raised:"$170M", money:"That's one round, led by SoftBank. It valued the app at $1.17 billion, on a claim of 20 million users.",
+    twist:"Its own board of directors opened an investigation into its user numbers.",
+    mid:["Peak value","$1.17B"], today:"$0. Gone.",
+    roast:"19 out of 20 users weren't in real life.",
+    story:"The board found about 95% of users were bots. It shut down in June 2023, and the founder was later charged with fraud.",
+    src:"The Information · TechCrunch · SEC · DOJ" },
+  { id:"twitch", name:"Twitch", was:"Started as Justin.tv", big:false, fate:"L", yrs:"2007 – now", bg:"#9146ff", fg:"#ffffff", lc:"#9146ff", lc2:"#7a2ef0",
+    what:"A guy straps a camera to his hat and livestreams his entire life, 24/7.",
+    pays:"Ads on the video, in theory.",
+    why:"Reality TV with no TV network. Anyone could have their own live show.",
+    raised:"Under $50M", money:"All-time, before it sold. Small for a video site with huge server bills.",
+    twist:"They noticed one category was growing faster than everything else: people watching other people play video games.",
+    mid:["Sold to Amazon","$970M"], today:"Amazon owns it",
+    roast:"One man's boring day turned into a billion-dollar idea.",
+    story:"Still alive, but past its peak. Viewers hit a five-year low in 2025 after a crackdown on fake bot views.",
+    src:"Widely reported · Dexerto · 2014, 2025" },
+  { id:"oura", name:"Oura", big:true, fate:"L", yrs:"2013 – now", bg:"#2b2b30", fg:"#e9e3d6", lc:"#3a3a40", lc2:"#2b2b30",
+    what:"A ring that tracks your sleep and heart rate. Started on Kickstarter in 2015.",
+    pays:"Sell a ring for hundreds of dollars, then charge a monthly membership.",
+    why:"Health tracking without wearing a watch.",
+    raised:"$1B+", money:"Fidelity is one of the investors. Wearable startups burn cash: Jawbone raised around $900M and still went bust.",
+    twist:"The NBA bought rings for players during the 2020 bubble season.",
+    mid:["IPO target","Up to $15.6B"], today:"Still private",
+    roast:"Hardware plus a subscription, and it worked. Cheat sheet says hi.",
+    story:"It made $1.21B in nine months, filed to go public, then shelved the IPO in September 2026 over a shaky market.",
+    src:"TechCrunch · Sept 2026" },
+  { id:"humane", name:"Humane", was:"The AI Pin", big:true, fate:"D", yrs:"2018 – 2025", bg:"#141414", fg:"#f2f2f2", lc:"#2a2a2a", lc2:"#1a1a1a",
+    what:"A $699 AI gadget you clip to your shirt. No screen: it projects onto your palm.",
+    pays:"$699 up front, then $24 a month.",
+    why:"Ex-Apple designers saying the smartphone era was over.",
+    raised:"$230M+", money:"Raised before it shipped a single device.",
+    twist:"A top tech YouTuber titled his review \"The Worst Product I've Ever Reviewed.\"",
+    mid:["Sold to HP","$116M"], today:"$0. Pins bricked.",
+    roast:"It was supposed to kill your phone. Your phone is fine.",
+    story:"Every AI Pin stopped working on Feb 28, 2025. Most buyers didn't get a refund.",
+    src:"TechCrunch · Feb 2025" },
+  { id:"mailchimp", name:"Mailchimp", big:false, fate:"L", boss:true, yrs:"2001 – now", bg:"#ffe01b", fg:"#241c15", lc:"#e6c800", lc2:"#ccb200",
+    what:"Software that lets small businesses send email newsletters. Started as a side project at a web design shop in Atlanta.",
+    pays:"A monthly fee from small businesses.",
+    why:"Big companies had email tools. The little guys had nothing.",
+    raised:"$0", money:"Not one dollar from investors. Ever.",
+    twist:"Twenty years in, the two founders still owned the whole company.",
+    mid:["Sold to Intuit","About $12B"], today:"Intuit owns it",
+    roast:"No investors. No board. $12 billion.",
+    story:"The largest exit ever for a company that never took outside money. It was a side project for years.",
+    src:"Intuit · Axios · 2021" },
+];
+const HALF = 5;   // Part 1 / Part 2 break after round 5
+const FATE = { L:"Lived", D:"Died" }, MONEY = { true:"Raised big", false:"Barely raised" };
+const mult = R => R.boss ? 2 : 1;
+const MAXPTS = ROUNDS.reduce((t,R)=>t+5*mult(R),0);
+const RANKS = [["Intern",0],["Analyst",.3],["Associate",.5],["VP",.65],["Partner",.8]];
+
+function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function safeSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+let S = JSON.parse(safeGet("livedDied2") || "null") || { raise:{}, lock:{} };   // raise[id] = true|false; lock[id] = { pick:"L"|"D", stage:1|2 }
+const save = () => safeSet("livedDied2", JSON.stringify(S));
+// Off localhost this is the public copy for viewers: no take log, and "You said" instead of "I said".
+const VIEWER = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const WHO = VIEWER ? "You" : "I";
+const log = (event, data={}) => VIEWER ? null : fetch("/log", { method:"POST", body:JSON.stringify({event, ...data}) }).catch(()=>{});
+if (VIEWER) document.getElementById("help").textContent = "Tap or → to continue · tap a button (or A / D) to answer · H = cheat sheet · ← back · R restart";
+
+// ---- scoring: money call right = 2. Fate call right = 3 before the twist, 1 after it. Final round doubles.
+const moneyPts = R => S.raise[R.id] == null ? null : (S.raise[R.id] === R.big ? 2 : 0) * mult(R);
+const fatePts = R => { const L = S.lock[R.id]; return L ? (L.pick === R.fate ? (L.stage === 1 ? 3 : 1) : 0) * mult(R) : null; };
+const roundPts = R => (moneyPts(R) || 0) + (fatePts(R) || 0);
+const rankOf = pts => RANKS.filter(([,t]) => pts/MAXPTS >= t).pop()[0];
+const chip = R => `<span class="chip" style="background:${R.bg};color:${R.fg}">${R.name}</span>`;
+const num = i => String(i+1).padStart(2,"0");
+const clueBox = (k, t, cls) => `<div class="clue ${cls}"><div class="h px"><i>${k}</i></div><div class="b">${t}</div></div>`;
+
+// ---- build screens
+const stage = document.getElementById("stage");
+stage.insertAdjacentHTML("beforeend", `<div class="hud">
+  <div class="iq"><span class="k px">VC SCORE</span><span class="v" id="iq">0</span><span class="of px">/ ${MAXPTS}</span></div>
+  <div class="mid"><div class="lvl px" id="lvl"></div><div class="pips">${ROUNDS.map(()=>`<i class="pip"></i>`).join("")}</div></div>
+  <div class="right"><span class="chipx px" id="streak">STREAK 0</span><span class="chipx px rank" id="rank">INTERN</span></div></div>`);
+const screens = [], reachAt = {};
+function add(cls, html, opts={}) { const d=document.createElement("section"); d.className="scr "+cls; d.innerHTML=html; stage.appendChild(d); screens.push({el:d, ...opts}); return d; }
+
+add("full title", `
+  <div class="k px">10 startups · 2 calls each · names hidden</div>
+  <h1 class="an">Did it<br><span class="l">live</span> or<br><span class="d">die?</span></h1>
+  <div class="sub">Call the money. Call the ending.</div>
+  <div class="stones"><div class="stone"><b>R.I.P.</b><span class="px">$400M?</span></div><div class="trophy"><b>Still<br>alive</b><span class="px">$1B?</span></div></div>
+  <div class="press px">▶ PRESS START</div>`, { kind:"title" });
+
+add("", `<div class="panel"><div class="kick px">Read this first · 1 of 3</div><h2 class="an">Startup money 101</h2>
+  <div class="rules">
+    <div class="rule"><div class="n px">Raised</div><div class="t">Sold a slice</div><div class="e">Investors hand over cash for a piece of the company. "Raised $100M" isn't sales or profit. It's money they have to spend well.</div></div>
+    <div class="rule"><div class="n px">Valuation</div><div class="t">A bet</div><div class="e">The price investors agreed on at the last deal. A $1B valuation isn't $1B in the bank, and it can go to zero.</div></div>
+    <div class="rule"><div class="n px">Bootstrapped</div><div class="t">No investors</div><div class="e">The company grows off what customers pay. Slower, but the founders keep it.</div></div>
+  </div>
+  <div class="rules-foot">Raising a lot is not the same as <em>winning.</em></div></div>`, { kind:"read" });
+
+add("", `<div class="panel"><div class="kick px">Read this first · 2 of 3</div><h2 class="an">Who raises big?</h2>
+  <div class="cheat">
+    <div class="col ylw"><h3 class="px">Usually raises $50M+</h3>
+      <div class="tip"><i>1</i><div><b>Costly to build</b><span>Gadgets, robots and factories burn cash long before the first sale.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Star founders</b><span>Investors chase people who've worked at Apple or Google.</span></div></div>
+      <div class="tip"><i>3</i><div><b>A race to get huge</b><span>Apps that have to grab everyone before a rival does.</span></div></div>
+    </div>
+    <div class="col blu"><h3 class="px">Usually doesn't</h3>
+      <div class="tip"><i>1</i><div><b>Cheap to start</b><span>A small product or simple software a few people can make.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Paid from day one</b><span>Customers fund it, so it never has to ask.</span></div></div>
+      <div class="tip"><i>3</i><div><b>Old or unsexy</b><span>Boring ideas and ones from before the VC boom get less attention.</span></div></div>
+    </div>
+  </div>
+  <div class="cheat-foot">In this game: <em>4 gadgets, 4 apps and sites, 1 robot kitchen, 1 sponge.</em> 5 lived. 5 died.</div></div>`, { kind:"read" });
+
+// Patterns that predict a startup's fate. True in general, not an answer key: some rounds break them.
+const CHEAT = `<div class="kick px">Read this first · 3 of 3</div><h2 class="an">The cheat sheet</h2>
+  <div class="cheat">
+    <div class="col red"><h3 class="px">Usually dies</h3>
+      <div class="tip"><i>1</i><div><b>Hardware + a subscription</b><span>A pricey gadget that only works if you keep paying every month.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Giant check, early</b><span>Hundreds of millions before it's clear people want it. Big money hides problems.</span></div></div>
+      <div class="tip"><i>3</i><div><b>"Uber for ___"</b><span>An app in the middle of a thin-margin business. Every order costs real money.</span></div></div>
+      <div class="tip"><i>4</i><div><b>Numbers nobody checked</b><span>Huge user counts with no proof people actually show up.</span></div></div>
+    </div>
+    <div class="col grn"><h3 class="px">Usually lives</h3>
+      <div class="tip"><i>1</i><div><b>Customers paid first</b><span>Real sales or a Kickstarter before the big investors showed up.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Cheap + obvious</b><span>Easy to make, easy to explain in one sentence, easy to buy again.</span></div></div>
+      <div class="tip"><i>3</i><div><b>Built it for themselves</b><span>Founders solving their own problem usually understand the customer.</span></div></div>
+      <div class="tip"><i>4</i><div><b>Sold anyway</b><span>Got rejected or had a bad moment, and sales went up regardless.</span></div></div>
+    </div>
+  </div>
+  <div class="cheat-foot">Pivots go both ways: <em>followed their users?</em> lives. <em>Ran from the problem?</em> dies.</div>`;
+add("", `<div class="panel">${CHEAT}</div>`, { kind:"read" });
+
+add("", `<div class="panel"><div class="kick px">How to play</div><h2 class="an">Two calls a round</h2>
+  <div class="rules">
+    <div class="rule"><div class="n px">Call 1 · the money</div><div class="t">Raised big?</div><div class="p">+2</div></div>
+    <div class="rule"><div class="n px">Call 2 · the ending</div><div class="t">Before the twist</div><div class="p">+3</div></div>
+    <div class="rule"><div class="n px">Or wait for the twist</div><div class="t">Play it safe</div><div class="p">+1</div></div>
+  </div>
+  <div class="rules-foot">Wrong = <em>zero.</em> No changing a call. The last round is worth <em>double.</em> Press H for the cheat sheet.</div></div>`, { kind:"rules" });
+
+function splash(R, ri) {
+  add("splash", `<div class="stripes" style="--lc:${R.lc};--lc2:${R.lc2}"></div>
+    <div class="inner"><div class="lv px">${R.boss ? "FINAL ROUND · 2X POINTS" : `ROUND ${num(ri)} / 10`}</div>
+      <div class="splash-t an">Startup #${num(ri)}</div><div class="sub">How much did it raise? How did it end?</div></div>
+    <div class="map"><div class="line"></div><div class="nodes">${ROUNDS.map((M,mi)=>`<div class="n ${M.boss?"boss":""}" data-i="${mi}"><b>${M.boss?"2X":mi+1}</b><span class="px">???</span></div>`).join("")}</div></div>`,
+    { kind:"splash", ri });
+}
+const fileTop = (R, ri, step) => `<div class="tab"><span class="px">CASE FILE</span><span class="px ol">${step}</span>${R.boss?`<span class="px x2">2X</span>`:""}</div>
+  <div class="codename an">Startup <em>#${num(ri)}</em></div>`;
+const hintKey = `<div class="hintkey px" data-cheat>H · Cheat sheet</div>`;
+function pitchScreen(R, ri) {
+  add("c1", `<div class="file">${fileTop(R, ri, "The pitch")}
+    <div class="clues">${clueBox("What it does", R.what, "new")}${clueBox("How it makes money", R.pays, "mid")}${clueBox("Why people believed it", R.why, "mid")}</div>
+    <div class="picks">
+      <div class="callq px">Call 1: the money</div>
+      <div class="pk big sm" data-p="big">Raised big<small>$50M or more</small><span class="key">A</span></div>
+      <div class="pk small sm" data-p="small">Barely raised<small>Under $50M</small><span class="key">D</span></div>
+      <div class="worth px">Right = <b>+${2*mult(R)}</b></div>
+      <div class="lockbadge px"></div>
+    </div>${hintKey}</div>`, { kind:"pitch", R, ri });
+}
+function fateScreen(R, ri, st) {
+  const money = `<div class="clue moneyblk ${st===1?"new":"old"}"><div class="h px"><i>The money</i><span class="mres"></span></div><div class="amt an">${R.raised}</div><div class="b">${R.money}</div></div>`;
+  add(st===1 ? "c1" : "c2", `<div class="file">${fileTop(R, ri, st===1 ? "The money" : "The twist")}
+    <div class="clues">${clueBox("What it does", R.what, "old")}${money}${st===2 ? clueBox("The twist", R.twist, "new") : ""}</div>
+    <div class="picks">
+      <div class="callq px">Call 2: the ending</div>
+      <div class="pk live" data-p="L">Lived<span class="key">A</span></div>
+      <div class="pk dead" data-p="D">Died<span class="key">D</span></div>
+      <div class="worth px">${st===1 ? "Call it now for" : "Last chance for"}<b>+${(st===1?3:1)*mult(R)}</b></div>
+      <div class="lockbadge px"></div>
+    </div>${hintKey}</div>`, { kind:"fate", R, ri, st });
+}
+function reveal(R, ri) {
+  const dead = R.fate === "D";
+  add("", `<div class="rv" style="--b:${R.bg};--f:${R.fg}">
+    <div class="tag"><span class="px">Startup #${num(ri)}</span><span class="px ol">${R.yrs}</span></div>
+    ${R.was ? `<div class="was px">${R.was}</div>` : ""}
+    <div class="name an ${R.name.length>7?"l":""}">${R.name}</div>
+    <div class="stats">
+      <div class="st"><span class="px">Raised</span><b>${R.raised}</b></div>
+      <div class="st"><span class="px">${R.mid[0]}</span><b>${R.mid[1]}</b></div>
+      <div class="st now"><span class="px">Today</span><b>${R.today}</b></div>
+    </div>
+    <div class="roast an">${R.roast}</div>
+    <div class="story">${R.story}</div>
+    <div class="src px">Source: ${R.src}</div>
+    <div class="fate">${dead ? `<div class="stone"><b>R.I.P.</b><span class="px">${R.yrs.replace(/.*?(\d{4})$/,"$1")}</span></div>` : `<div class="trophy"><b>Still<br>alive</b><span class="px">${R.today}</span></div>`}</div>
+    <div class="you"></div><div class="plus"></div><div class="confetti"></div></div>`, { kind:"reveal", R, ri });
+}
+function scoreboard(from, to, label) {
+  add("", `<div class="panel"><div class="kick px">${label}</div><h2 class="an">${to===ROUNDS.length?"Part 2":"Part 1"} results</h2>
+    <div class="rows"></div><div class="tot"></div></div>`, { kind:"sb", from, to, ri: to===ROUNDS.length ? undefined : to-1 });
+}
+
+ROUNDS.forEach((R, ri) => {
+  splash(R, ri);
+  pitchScreen(R, ri);
+  fateScreen(R, ri, 1);
+  fateScreen(R, ri, 2);
+  reveal(R, ri);
+  if (ri === HALF-1) scoreboard(0, HALF, "Halftime");
+});
+scoreboard(HALF, ROUNDS.length, "Game over");
+screens.forEach((s,i) => { if (s.kind==="reveal") reachAt[s.R.id] = i; });
+const moneyAt = R => reachAt[R.id] - 2;   // the money call is settled on the screen after the pitch
+add("", `<div class="panel"><div class="kick px">Where they are today</div><h2 class="an">Graveyard vs. survivors</h2>
+  <div class="yard"><div><h3 class="px dh">The graveyard</h3><div class="row" id="yd"></div></div><div><h3 class="px lh">Still alive</h3><div class="row" id="yl"></div></div></div>
+  <div class="yard-foot">Nearly $1B raised by the dead ones. <em>The biggest winner raised $0.</em></div></div>`, { kind:"yard" });
+add("", `<div class="panel"><div class="fin-k px">Final VC score</div><div class="fin-v an"></div><div class="fin-r">Rank</div><div class="fin-rank an"></div>
+  <div class="ladder"></div><div class="fin-c px">▼ Comment your score</div></div>`, { kind:"final" });
+
+// ---- HUD (money points land on the money screen, ending points on the reveal)
+let cur = 0;
+function hud(s, hold) {
+  const ri = s.ri ?? (["title","read","rules"].includes(s.kind) ? -1 : ROUNDS.length);
+  let tot = 0, streak = 0;
+  ROUNDS.forEach(R => {
+    if (moneyAt(R) <= cur) tot += moneyPts(R) || 0;
+    if (reachAt[R.id] > cur || (hold && reachAt[R.id] === cur)) return;
+    const p = fatePts(R); if (p == null) return; tot += p; streak = p ? streak+1 : 0; });
+  const iq = document.getElementById("iq");
+  if (iq.textContent !== String(tot)) { iq.textContent = tot; iq.classList.remove("bump"); void iq.offsetWidth; iq.classList.add("bump"); }
+  const st = document.getElementById("streak");
+  st.textContent = streak >= 2 ? `STREAK x${streak}` : `STREAK ${streak}`; st.classList.toggle("fire", streak >= 2);
+  document.getElementById("rank").textContent = rankOf(tot).toUpperCase();
+  document.getElementById("lvl").textContent = ri < 0 ? "READ FIRST" : ri >= ROUNDS.length ? "GAME OVER" : `${ROUNDS[ri].boss ? "FINAL ROUND" : "ROUND " + (ri+1)} · ${ri < HALF ? "PART 1" : "PART 2"}`;
+  document.querySelectorAll(".pip").forEach((p,i)=>{ const R = ROUNDS[i], done = reachAt[R.id] <= cur && !(hold && reachAt[R.id] === cur), sc = fatePts(R);
+    p.classList.toggle("ok", done && sc > 0); p.classList.toggle("no", done && sc === 0); p.classList.toggle("cur", i === ri && !done); });
+}
+
+// ---- renderers
+function renderSplash(s) {
+  s.el.querySelectorAll(".map .n").forEach(n => { const mi = +n.dataset.i, R = ROUNDS[mi], sc = fatePts(R);
+    n.classList.toggle("cur", mi === s.ri); n.classList.toggle("ok", mi < s.ri && sc > 0); n.classList.toggle("no", mi < s.ri && sc === 0);
+    n.querySelector("span").textContent = mi < s.ri ? R.name : "???"; });
+}
+function renderPitch(s) {
+  const v = S.raise[s.R.id], set = v != null, file = s.el.querySelector(".file");
+  file.classList.toggle("locked", set);
+  s.el.querySelectorAll(".pk").forEach(p => { const mine = (p.dataset.p === "big") === v; p.classList.toggle("pick", set && mine); p.classList.toggle("off", set && !mine); });
+  if (set) s.el.querySelector(".lockbadge").innerHTML = `Locked: ${MONEY[v]}`;
+}
+function renderFate(s) {
+  const R = s.R, L = S.lock[R.id], locked = L && L.stage <= s.st, file = s.el.querySelector(".file");
+  file.classList.toggle("locked", !!locked);
+  s.el.querySelectorAll(".pk").forEach(p => { p.classList.toggle("pick", !!locked && p.dataset.p === L.pick); p.classList.toggle("off", !!locked && p.dataset.p !== L.pick); });
+  if (locked) s.el.querySelector(".lockbadge").innerHTML = `Locked: ${FATE[L.pick]}<br>+${(L.stage===1?3:1)*mult(R)} if right`;
+  const p = moneyPts(R), res = s.el.querySelector(".mres");
+  res.textContent = p == null ? "" : p ? `Right +${p}` : `Wrong · ${MONEY[R.big]}`;
+  res.className = "mres " + (p == null ? "" : p ? "ok" : "no");
+}
+function pickMoney(s, big) {
+  if (S.raise[s.R.id] != null) return;   // no changing a call
+  S.raise[s.R.id] = big; save();
+  log("raise", { n:cur, round:s.R.id, big });
+  renderPitch(s);
+}
+function lock(s, pick) {
+  if (S.lock[s.R.id] && S.lock[s.R.id].stage <= s.st) return;
+  S.lock[s.R.id] = { pick, stage:s.st }; save();
+  log("lock", { n:cur, round:s.R.id, pick, stage:s.st });
+  renderFate(s);
+}
+function confetti(box) {
+  const cols = ["#ffd23f","#2fe07a","#ff3d7f","#4fd1ff","#ffffff","#ff8a1f"];
+  box.innerHTML = Array.from({length:80},()=>`<i style="left:${Math.random()*100}%;background:${cols[Math.random()*6|0]};--dx:${(Math.random()-.5)*400}px;--r:${Math.random()*900}deg;--t:${1.2+Math.random()*1.2}s;animation-delay:${Math.random()*.25}s"></i>`).join("");
+}
+function renderReveal(s) {
+  const R = s.R, L = S.lock[R.id], p = fatePts(R), el = s.el, rv = el.querySelector(".rv");
+  ["fate","you","plus"].forEach(c => el.querySelector("."+c).classList.remove("show"));
+  ["roast","story"].forEach(c => el.querySelector("."+c).classList.remove("show"));
+  el.querySelector(".confetti").innerHTML = ""; rv.classList.remove("shake");
+  (s.timers || []).forEach(clearTimeout);
+  // beats: raised -> middle number -> TODAY -> the stamp + result -> the roast and story
+  s.timers = [
+    setTimeout(() => { el.querySelector(".fate").classList.add("show");
+      if (L) { const you = el.querySelector(".you"), right = p > 0;
+        you.innerHTML = `<span class="me">${WHO} said ${FATE[L.pick]}</span><span class="vd" style="background:${right?"var(--live)":"var(--dead)"}">${right?"+"+p:"Wrong"}</span>`;
+        you.classList.add("show");
+        if (right) { const pl = el.querySelector(".plus"); pl.textContent = `+${p}`; pl.classList.add("show"); if (L.stage === 1) confetti(el.querySelector(".confetti")); }
+        else { void rv.offsetWidth; rv.classList.add("shake"); } }
+      hud(s); }, 2500),
+    setTimeout(() => { el.querySelector(".roast").classList.add("show"); el.querySelector(".story").classList.add("show"); }, 3100),
+  ];
+}
+function renderSB(s) {
+  const rs = ROUNDS.slice(s.from, s.to), cell = (txt, right) => `<span class="fl ${right==null?"":right?"L":"D"}">${txt}</span>`;
+  s.el.querySelector(".rows").innerHTML = `<div class="r hd"><span>Startup</span><span>Money call</span><span>Ending call</span><span>Today</span><span style="text-align:right">Pts</span></div>` +
+    rs.map(R => { const m = S.raise[R.id], L = S.lock[R.id], mp = moneyPts(R), fp = fatePts(R), p = roundPts(R);
+      return `<div class="r">${chip(R)}${cell(m==null?"—":MONEY[m], mp==null?null:mp>0)}${cell(L?FATE[L.pick]:"—", fp==null?null:fp>0)}<span class="g">${R.today}</span><span class="pp">${mp==null&&fp==null?"—":p?"+"+p:"0"}</span></div>`; }).join("");
+  const pts = rs.reduce((t,R)=>t+roundPts(R),0), mx = rs.reduce((t,R)=>t+5*mult(R),0);
+  const tot = ROUNDS.slice(0, s.to).reduce((t,R)=>t+roundPts(R),0), right = rs.filter(R=>fatePts(R)>0).length;
+  s.el.querySelector(".tot").innerHTML = `<div class="k px">${s.to===ROUNDS.length?"Part 2":"Part 1"}</div><div class="v">${pts}<small>/${mx}</small></div>
+    <div class="d">${right} of ${rs.length} endings right<br>Score so far: ${tot}<br>Rank: ${rankOf(tot)}</div>`;
+}
+function renderYard(s) {
+  const tile = (R,k) => { const p = fatePts(R), mk = p==null ? "" : `<div class="mk" style="background:${p>0?"var(--live)":"var(--dead)"}">${p>0?"✓":"✗"}</div>`;
+    return `<div class="tile ${R.fate==="L"?"w":""}" style="animation-delay:${k*.12}s"><b>${R.name}</b><span class="px">${R.raised}</span>${mk}</div>`; };
+  s.el.querySelector("#yd").innerHTML = ROUNDS.filter(R=>R.fate==="D").map(tile).join("");
+  s.el.querySelector("#yl").innerHTML = ROUNDS.filter(R=>R.fate==="L").map(tile).join("");
+}
+function renderFinal(s) {
+  const tot = ROUNDS.reduce((t,R)=>t+roundPts(R),0), r = rankOf(tot);
+  s.el.querySelector(".fin-v").innerHTML = `${tot}<small>/${MAXPTS}</small>`;
+  s.el.querySelector(".fin-rank").textContent = r;
+  s.el.querySelector(".ladder").innerHTML = RANKS.map(([n,t])=>`<div class="px ${n===r?"me":""}"><span>${n}</span><span>${Math.ceil(t*MAXPTS)}+</span></div>`).join("");
+}
+
+// ---- navigation
+function show(n) {
+  cur = Math.max(0, Math.min(screens.length-1, n));
+  screens.forEach((s,i)=>s.el.classList.toggle("on", i===cur));
+  const s = screens[cur];
+  log("screen", { n:cur, kind:s.kind, round:s.R?.id, stage:s.st });
+  if (s.kind==="splash") renderSplash(s);
+  if (s.kind==="pitch") renderPitch(s);
+  if (s.kind==="fate") renderFate(s);
+  if (s.kind==="sb") renderSB(s);
+  if (s.kind==="yard") renderYard(s);
+  if (s.kind==="final") renderFinal(s);
+  hud(s, s.kind==="reveal");
+  if (s.kind==="reveal") renderReveal(s);
+}
+function nudge(s) { const pk = s.el.querySelector(".picks"); pk.classList.remove("nudge"); void pk.offsetWidth; pk.classList.add("nudge"); }
+function next() {
+  const s = screens[cur];
+  if (s.kind==="pitch" && S.raise[s.R.id] == null) return nudge(s);
+  if (s.kind==="fate" && s.st===2 && !S.lock[s.R.id]) return nudge(s);   // the twist is the last chance to call it
+  show(cur+1);
+}
+function answer(s, a) {   // a: true for the top button
+  if (s.kind==="pitch") pickMoney(s, a);
+  if (s.kind==="fate") lock(s, a ? "L" : "D");
+}
+
+stage.insertAdjacentHTML("beforeend", `<div id="cheatlay"><div class="panel">${CHEAT}</div></div>`);
+const cheatlay = document.getElementById("cheatlay");
+function toggleCheat(on = !cheatlay.classList.contains("on")) { cheatlay.classList.toggle("on", on); log("cheat", { n:cur, open:on }); }
+
+document.addEventListener("keydown", e => {
+  document.getElementById("help").style.display = "none";
+  if (e.key==="h" || e.key==="H") return toggleCheat();
+  if (cheatlay.classList.contains("on")) { if (e.key==="Escape" || e.key===" " || e.key==="Enter" || e.key==="ArrowRight") { e.preventDefault(); toggleCheat(false); } return; }
+  const s = screens[cur], k = e.key.toLowerCase();
+  if (k==="a" || k==="d") return answer(s, k==="a");
+  if (e.key==="ArrowRight" || e.key===" " || e.key==="Enter") { e.preventDefault(); next(); }
+  if (e.key==="ArrowLeft") show(cur-1);
+  if (k==="f") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  if (k==="r") { S = { raise:{}, lock:{} }; save(); log("reset"); show(0); }
+});
+stage.addEventListener("click", e => {
+  if (cheatlay.classList.contains("on")) return toggleCheat(false);
+  if (e.target.closest("[data-cheat]")) return toggleCheat(true);
+  const s = screens[cur], pk = e.target.closest(".pk");
+  if (pk) return answer(s, pk.dataset.p==="big" || pk.dataset.p==="L");
+  next();
+});
+
+function fit() { const k = Math.min(document.documentElement.clientWidth/1920, document.documentElement.clientHeight/1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+// show.html#12 jumps straight to screen 12 (to pick back up mid-take)
+addEventListener("resize", fit); fit(); show(parseInt(location.hash.slice(1)) || 0);
+</script>
+</body>
+</html>

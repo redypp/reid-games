@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <title>Pouch CPG IQ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="How much do you actually know about CPG? Play Reid's nicotine pouch game and beat his score.">
@@ -303,7 +307,6 @@ function lock(q, v) { if (v != null) st.g[q.id] = v; else delete st.g[q.id]; st.
 function renderReveal(s) {
   const q = s.q, k = q.pick === "brands" ? q.ans : q.s, g = st.g[q.id], p = score(q, g), lvl = p == null ? null : p/(q.x||1);
   const answer = q.pick === "brands" ? q.ans : (q.show || fmtVal(q, q.ans));
-  const r = REID[q.id], rp = score(q, r);
   app.innerHTML = `<section class="card flip" style="${vars(k)}">
     ${lvl != null ? `<div class="stamp" style="background:${VCOL[lvl]}">${q.pick ? (p ? "Got it" : "Nope") : VERDICT[lvl]}</div>` : ""}
     <div class="tag"><span class="px">Q${s.qi+1}/${s.L.qs.length}</span><span class="px ol">${nameOf(k)}</span></div>
@@ -311,7 +314,6 @@ function renderReveal(s) {
     <p class="big an">${answer}</p>
     <div class="verdict">${g != null ? `<span class="me">You said ${esc(fmtVal(q, g))}</span><span class="pts" style="background:${VCOL[lvl]}">+${p} pts</span>` : `<span class="me">Skipped · +0</span>`}</div>
     <p class="fact">${q.fact}</p>
-    ${hasReid && r != null ? `<div class="reid"><span class="px">Reid's guess</span>${esc(fmtVal(q, r))} · +${rp} pts</div>` : ""}
     ${q.src ? `<div class="src px">Source: ${q.src}</div>` : ""}
     <div class="row"><button class="btn" id="go" type="button">Next ▶</button></div>
     <div class="confetti"></div></section>`;

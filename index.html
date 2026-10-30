@@ -24,6 +24,7 @@
   .art { position:relative; min-height:300px; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:0; padding:20px; }
   .art img { height:210px; width:auto; max-width:34%; object-fit:contain; margin:0 -8px; filter:drop-shadow(0 12px 18px rgba(0,0,0,.3)); }
   .art .tag { position:absolute; left:0; top:0; background:var(--red); color:#fff; font-weight:900; font-size:13px; letter-spacing:.12em; text-transform:uppercase; padding:9px 13px; }
+  .art .word { font-family:"Anton",Impact,sans-serif; text-transform:uppercase; font-size:clamp(46px, 6vw, 68px); line-height:1; text-align:center; }
   .body { padding:28px; display:flex; flex-direction:column; gap:12px; justify-content:center; }
   .num { font-weight:900; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
   .body h2 { font-family:"Anton",Impact,sans-serif; font-weight:400; text-transform:uppercase; font-size:clamp(32px, 4.6vw, 50px); line-height:.96; }
@@ -60,21 +61,26 @@ const CHANNEL_URL = "";
 const VIDEOS = [
   { slug: "pouches01", video: "", title: "How much do I actually know about CPG?",
     blurb: "ZALT, Grinds, Neutonic, Nectr, Ultra, then a ZYN boss level. 11 levels of caffeine, margins and deal math.",
-    score: "Reid scored 62/153. Beat that.", bg: "#0b0d17",
+    score: "See if you can beat me at the end.", bg: "#0b0d17", n: 2, tag: "Latest video",
     imgs: ["pouches01/img/grinds.png", "pouches01/img/neutonic.png", "pouches01/img/ultra.png", "pouches01/img/nectr.png"] },
+  { slug: "startups01", video: "", title: "Did it live or die?",
+    blurb: "10 startups with their names hidden. Call how much they raised, then call if they lived or died. Round 10 is worth double.",
+    score: "There's a cheat sheet before round 1. Use it.", bg: "#0b0d17", n: 3, tag: "Next video",
+    text: ["Lived", "or", "died?"], imgs: [] },
   { slug: "drinks01", video: "", title: "I guessed how much 5 drink brands raised",
     blurb: "Recess, LMNT, Olipop, Poppi and Liquid Death. Guess what they raised, then what they sell a year.",
-    score: "Reid was off by $847M. Beat that.", bg: "#ffd640",
+    score: "See if you can beat me at the end.", bg: "#ffd640", n: 1,
     imgs: ["drinks01/img/olipop.png", "drinks01/img/poppi.png"] },
 ];
 document.getElementById("videos").innerHTML = VIDEOS.map((v, i) => `
   <a class="video" href="${v.slug}/">
     <div class="art" style="background:${v.bg}">
-      ${i === 0 ? `<span class="tag">Latest video</span>` : ""}
+      ${v.tag ? `<span class="tag">${v.tag}</span>` : ""}
       ${v.imgs.map(src => `<img src="${src}" alt="">`).join("")}
+      ${v.text ? `<div class="word"><span style="color:#2fe07a">${v.text[0]}</span> <span style="color:#f4f1ea">${v.text[1]}</span> <span style="color:#ff4a3a">${v.text[2]}</span></div>` : ""}
     </div>
     <div class="body">
-      <div class="num">Video ${String(VIDEOS.length - i).padStart(2, "0")}</div>
+      <div class="num">Video ${String(v.n).padStart(2, "0")}</div>
       <h2>${v.title}</h2>
       <p>${v.blurb}</p>
       <p><b>${v.score}</b></p>

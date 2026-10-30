@@ -161,7 +161,7 @@ let guesses = JSON.parse(safeGet("guesses2") || '{"1":{},"2":{}}');
 // when served by serve.py, every guess and screen change is written to take.jsonl
 let log = function() {};
 const TOUCH = matchMedia("(pointer: coarse)").matches;          // viewer version: nothing is recorded
-// what Reid said on camera (drinks01) — the score to beat
+// what Reid said on camera (drinks01). Shown ONLY on the final screen, so the video isn't spoiled.
 const REID = {"1": {"Recess": 50, "LMNT": 90, "Olipop": 100, "Poppi": 50, "Liquid Death": 100},
               "2": {"Recess": 40, "LMNT": 250, "Olipop": 500, "Poppi": 300, "Liquid Death": 150}};
 const VIDEO_URL = "";             // the YouTube link for this game (shown on the final screen)
@@ -237,16 +237,15 @@ function renderBoard(s) {
   const list = [...BRANDS].sort((a,b)=>b[P.key]-a[P.key]);
   const max = list[0][P.key];
   s.el.querySelector(".rows").innerHTML = list.map((b,k)=>`
-    <div class="row"><span class="rk">${k+1}</span><span>${b.name}<div class="gs">${g[b.name]!=null?`You $${g[b.name]}M · `:""}Reid $${REID[s.part][b.name]}M</div></span>
+    <div class="row"><span class="rk">${k+1}</span><span>${b.name}${g[b.name]!=null?`<div class="gs">You $${g[b.name]}M</div>`:""}</span>
       <div><div class="bar" data-w="${b[P.key]/max*100}" style="background:${b.bg==="#ffd640"?"#e0b100":b.bg}"></div></div>
       <span class="act">${b[P.show]}</span></div>`).join("");
   const off = p => BRANDS.reduce((t,b)=>guesses[p][b.name]!=null ? t+Math.abs(guesses[p][b.name]-b[PARTS[p].key]) : t, 0);
   const total = s.el.querySelector(".total");
   total.style.display = BRANDS.some(b=>g[b.name]!=null) ? "block" : "none";
-  const roff = p => BRANDS.reduce((t,b)=>t+Math.abs(REID[p][b.name]-b[PARTS[p].key]), 0);
   total.innerHTML = `<div class="k">You were off by</div><div class="v">${fmt(off(s.part))}</div>
-    <div class="d">Reid was off by ${fmt(roff(s.part))}</div>
-    ${s.part===2 ? `<div class="both">Both parts — you: ${fmt(off(1)+off(2))} · Reid: ${fmt(roff(1)+roff(2))}</div>` : ""}`;
+    <div class="d">${dollars(off(s.part))}</div>
+    ${s.part===2 ? `<div class="both">Both parts: ${fmt(off(1)+off(2))}</div>` : ""}`;
   requestAnimationFrame(()=>requestAnimationFrame(()=>s.el.querySelectorAll(".bar").forEach(e=>e.style.width=e.dataset.w+"%")));
 }
 function renderTwist(s) {
@@ -287,7 +286,7 @@ function show(n) {
       const g = guesses[s.part][b.name];
       if (g!=null) {
         const diff = Math.abs(g-b[P.key]), close = diff/b[P.key] <= .45;
-        cmp.innerHTML = `<span class="me">You said $${g}M</span><span class="off">Off by ${fmt(diff)}</span><span class="reid">Reid said $${REID[s.part][b.name]}M</span>`;
+        cmp.innerHTML = `<span class="me">You said $${g}M</span><span class="off">Off by ${fmt(diff)}</span>`;
         stamp.textContent = close ? "Close" : "Way off"; stamp.style.color = close ? "#2fbf6b" : "#ff4a3a"; stamp.classList.add("show");
       }
     });
