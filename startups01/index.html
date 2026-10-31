@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="description" content="10 hidden startups, 3 clues each. Did it live or die? Lock in early for more points.">
+<meta name="description" content="10 startups with their names hidden. Guess how much each raised and whether it lived or died, then see if you beat Reid.">
+<title>Did It Live or Die?</title>
 <title>Lived or Died</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -21,7 +22,7 @@
       linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/64px 64px,
       radial-gradient(1300px 760px at 50% 45%, #1c2244, #0b0d17 70%); }
   #stage::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:20;
-    background:repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.10) 3px 4px); }
+    background:repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.04) 3px 4px); }
 
   /* ---------- HUD ---------- */
   .hud { position:absolute; left:0; right:0; top:0; height:96px; z-index:10; display:flex; align-items:center; justify-content:space-between;
@@ -277,16 +278,89 @@
   .plus { top:440px; }
   .r { grid-template-columns:300px 1fr .8fr 1fr 90px; font-size:26px; }
   .r .fl { font-size:30px; } .r .g { font-size:22px; }
+  /* v3: simple scoring, image-led slides */
+  .wall { top:150px; right:90px; display:grid; grid-template-columns:repeat(2,250px); gap:18px; }
+  .wall img { width:250px; height:230px; object-fit:cover; border-radius:18px; box-shadow:0 16px 30px rgba(0,0,0,.5); }
+  .wall img:nth-child(odd) { transform:rotate(-2deg); } .wall img:nth-child(even) { transform:rotate(2deg); }
+  .defn { position:absolute; left:64px; right:64px; top:226px; font-size:34px; font-weight:700; color:#d5d8ea; }
+  .defn b { color:var(--neon); }
+  .cheat.low { top:300px; }
+  .photo { position:absolute; left:40px; top:40px; bottom:40px; width:800px; border-radius:26px; overflow:hidden; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; }
+  .photo.white { background:#fff; }
+  .photo img { width:100%; height:100%; display:block; }
+  .photo.white img { padding:90px; }
+  .monoart { font-size:300px; }
+  .side { position:absolute; left:880px; right:44px; top:40px; bottom:40px; display:flex; flex-direction:column; gap:16px; }
+  .qc .tag { position:static; }
+  .plate { background:#fff; border-radius:18px; height:120px; width:fit-content; max-width:560px; padding:16px 28px; display:flex; align-items:center; flex:none; color:#111; box-shadow:0 8px 0 rgba(0,0,0,.2); }
+  .plate img { height:100%; max-width:500px; object-fit:contain; display:block; }
+  .plate.txt { font-size:72px; }
+  .scr.on .rv.qc { animation:cardIn .3s ease-out; }
+  .what { font-size:42px; font-weight:900; line-height:1.18; }
+  .pays { font-size:30px; font-weight:700; line-height:1.3; }
+  .pays.tw { padding:14px 18px; border-radius:14px; background:rgba(0,0,0,.2); }
+  .res { font-size:15px; width:fit-content; padding:8px 12px; border-radius:8px; background:rgba(0,0,0,.2); }
+  .res.ok { background:var(--live); color:#0b2a17; } .res.no { background:var(--dead); color:#2a0b0b; }
+  .amt2 { font-size:120px; }
+  .q { font-size:68px; margin-top:auto; }
+  .btns { display:grid; grid-template-columns:1fr 1fr; gap:18px; flex:none; }
+  .btns .pk { height:150px; font-size:66px; padding:0 22px; }
+  .btns .key { width:48px; height:48px; font-size:16px; flex:none; }
+  .hintkey { right:44px; bottom:12px; color:inherit; opacity:.75; }
+  .rvl .plate { position:absolute; left:64px; top:112px; }
+  .rvl .was { top:258px; left:64px; font-size:15px; }
+  .rvl .stats { top:296px; width:1000px; }
+  .rvl .st { min-height:150px; padding:18px 20px; } .rvl .st b { font-size:50px; }
+  .rvl .roast { top:474px; width:1000px; font-size:60px; }
+  .rvl .story { top:620px; width:1000px; font-size:30px; }
+  .rvl .photo { left:auto; right:40px; top:40px; bottom:150px; width:660px; }
+  .rvl .photo.white img { padding:60px; }
+  .rvl .fate { position:absolute; inset:0; width:auto; height:auto; right:0; top:0; display:flex; }
+  .bigstamp { font-size:170px; padding:12px 44px; border:14px solid; border-radius:22px; transform:rotate(-9deg); background:rgba(0,0,0,.72); }
+  .bigstamp.d { color:var(--dead); border-color:var(--dead); } .bigstamp.l { color:var(--live); border-color:var(--live); }
+  .rvl .you { right:40px; top:auto; bottom:50px; width:660px; }
+  .r { grid-template-columns:300px 1fr .8fr 1fr 70px; }
+  /* v4: nothing stacked, no brand before the reveal */
+  .title h1 { top:190px; font-size:280px; }
+  .title .sub { top:730px; font-size:50px; }
+  .rv.qc { background:var(--b); }
+  .photo.m1 img { filter:blur(44px) saturate(.8); transform:scale(1.25); }
+  .photo.m2 img { filter:blur(30px) saturate(.9); transform:scale(1.25); }
+  .photo.white { background:#2a3058; }
+  .monoart { color:#fff; }
+  .qc .hintkey { position:static; opacity:1; color:var(--f); margin-left:auto; cursor:pointer; }
+  .qc .tag span.px { font-size:13px; }
+  .rv.rvl { display:grid; grid-template-columns:minmax(0,1fr) 620px; gap:36px; padding:36px 40px; }
+  .rcol { display:flex; flex-direction:column; gap:20px; min-width:0; }
+  .rvl .tag, .rvl .plate, .rvl .stats, .rvl .roast, .rvl .story, .rvl .src { position:static; width:auto; }
+  .rvl .plate { width:fit-content; height:110px; }
+  .rvl .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  .rvl .roast { font-size:58px; line-height:1.02; }
+  .rvl .story { font-size:29px; line-height:1.28; }
+  .cheat .tip b { font-size:46px; } .cheat .tip span { font-size:27px; }
+  .rvl .src { margin-top:auto; }
+  .rpic { display:flex; flex-direction:column; gap:16px; min-width:0; min-height:0; }
+  .rvl .photo { position:relative; left:auto; right:auto; top:auto; bottom:auto; width:100%; flex:1; min-height:0; }
+  .rvl .photo.white { background:#fff; }
+  .verdict { display:flex; gap:14px; align-items:stretch; flex:none; height:112px; }
+  .rvl .fate { position:static; inset:auto; width:auto; height:auto; display:block; }
+  .bigstamp { font-size:80px; line-height:1; padding:14px 26px; border:none; border-radius:16px; transform:none; height:100%; display:flex; align-items:center; }
+  .bigstamp.d { background:var(--dead); color:#2a0b0b; } .bigstamp.l { background:var(--live); color:#0b2a17; }
+  .rvl .you { position:static; flex:1; width:auto; display:flex; align-items:stretch; font-size:26px; min-width:0; }
+  .rvl .you span { display:flex; align-items:center; }
   #help { position:fixed; bottom:8px; left:10px; color:#777; font:12px Helvetica; z-index:30; }
+  /* You vs. Reid, final screen only */
+  .vs { position:absolute; right:64px; top:530px; width:520px; border-radius:22px; background:var(--neon); color:#111; padding:24px 28px; }
+  .vs .k { font-size:14px; }
+  .vs .v { font-family:"Anton",Impact,sans-serif; font-size:84px; line-height:1; margin-top:12px; }
+  .vs .d { font-weight:900; font-size:27px; line-height:1.2; margin-top:10px; }
+  .fin-c { width:640px; line-height:1.6; }
 </style>
-</head>
-<body>
 
 
 <div id="stage"></div>
-<div id="help">→ / space next · A = top button · D = bottom button · H = cheat sheet · ← back · F fullscreen · R restart</div>
+<div id="help">A / D answer · → / space next · H = cheat sheet · ← back · F fullscreen · R restart</div>
 
-<a href="../" style="position:fixed;right:12px;top:12px;z-index:50;font:900 12px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#f4f1ea;background:rgba(0,0,0,.55);padding:9px 12px;text-decoration:none;border-radius:6px">&larr; All games</a>
 <script>
 // Fates + numbers are reported figures, checked Oct 2026; sources in SCRIPT.md. Names stay hidden until each reveal.
 // big = raised $50M+ all-time. fate: L lived, D died.
@@ -392,146 +466,133 @@ const ROUNDS = [
     story:"The largest exit ever for a company that never took outside money. It was a side project for years.",
     src:"Intuit · Axios · 2021" },
 ];
+// Real logos + product photos. logo0/name0 = what it was called at the start, so Ring and Twitch stay a surprise.
+const ART = {
+  juicero:{ img:"juicero.jpg", pos:"40% 50%", logo:"juicero_logo.png" },
+  scrub:{ img:"scrub.jpg", logo:"scrub_logo.png" },
+  zume:{ img:"zume.jpg", logo:"zume_logo.png" },
+  washio:{ img:"washio_logo.jpg", fit:"contain", logo:"washio_logo.jpg" },
+  ring:{ img:"ring.jpg", pos:"62% 50%", logo:"ring_logo.png", name0:"DoorBot" },
+  irl:{ mono:"IRL" },
+  twitch:{ img:"justin.jpg", pos:"60% 30%", logo:"twitch_logo.png", logo0:"jtv_logo.png" },
+  oura:{ img:"oura.jpg", logo:"oura_logo.png" },
+  humane:{ img:"humane.jpg", logo:"humane_logo.png" },
+  mailchimp:{ img:"mailchimp.jpg", logo:"mailchimp_logo.png" },
+};
 const HALF = 5;   // Part 1 / Part 2 break after round 5
-const FATE = { L:"Lived", D:"Died" }, MONEY = { true:"Raised big", false:"Barely raised" };
-const mult = R => R.boss ? 2 : 1;
-const MAXPTS = ROUNDS.reduce((t,R)=>t+5*mult(R),0);
-const RANKS = [["Intern",0],["Analyst",.3],["Associate",.5],["VP",.65],["Partner",.8]];
+const FATE = { L:"Lived", D:"Died" }, MONEY = { true:"$50M+", false:"Under $50M" };
+const MAXPTS = ROUNDS.length * 2;
+const RANKS = [["Intern",0],["Analyst",.3],["Associate",.5],["VP",.7],["Partner",.85]];
 
 function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
 function safeSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
-let S = JSON.parse(safeGet("livedDied2") || "null") || { raise:{}, lock:{} };   // raise[id] = true|false; lock[id] = { pick:"L"|"D", stage:1|2 }
-const save = () => safeSet("livedDied2", JSON.stringify(S));
+let S = JSON.parse(safeGet("livedDied3") || "null") || { money:{}, end:{} };   // money[id] = true|false; end[id] = "L"|"D"
+const save = () => safeSet("livedDied3", JSON.stringify(S));
 // Off localhost this is the public copy for viewers: no take log, and "You said" instead of "I said".
 const VIEWER = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 const WHO = VIEWER ? "You" : "I";
 const log = (event, data={}) => VIEWER ? null : fetch("/log", { method:"POST", body:JSON.stringify({event, ...data}) }).catch(()=>{});
-if (VIEWER) document.getElementById("help").textContent = "Tap or → to continue · tap a button (or A / D) to answer · H = cheat sheet · ← back · R restart";
+if (VIEWER) document.getElementById("help").textContent = "Tap an answer (or A / D) · tap or → to continue · H = cheat sheet · ← back · R restart";
 
-// ---- scoring: money call right = 2. Fate call right = 3 before the twist, 1 after it. Final round doubles.
-const moneyPts = R => S.raise[R.id] == null ? null : (S.raise[R.id] === R.big ? 2 : 0) * mult(R);
-const fatePts = R => { const L = S.lock[R.id]; return L ? (L.pick === R.fate ? (L.stage === 1 ? 3 : 1) : 0) * mult(R) : null; };
-const roundPts = R => (moneyPts(R) || 0) + (fatePts(R) || 0);
+// ---- scoring: every right answer is 1 point. Two questions a startup, 20 points total.
+const moneyPt = R => S.money[R.id] == null ? null : +(S.money[R.id] === R.big);
+const endPt = R => S.end[R.id] == null ? null : +(S.end[R.id] === R.fate);
+const roundPts = R => (moneyPt(R) || 0) + (endPt(R) || 0);
 const rankOf = pts => RANKS.filter(([,t]) => pts/MAXPTS >= t).pop()[0];
 const chip = R => `<span class="chip" style="background:${R.bg};color:${R.fg}">${R.name}</span>`;
 const num = i => String(i+1).padStart(2,"0");
-const clueBox = (k, t, cls) => `<div class="clue ${cls}"><div class="h px"><i>${k}</i></div><div class="b">${t}</div></div>`;
+const plate = R => { const logo = ART[R.id].logo;
+  return logo ? `<div class="plate"><img src="img/${logo}" alt="${R.name} logo"></div>` : `<div class="plate txt an">${R.name}</div>`; };
+const photo = (R, mystery="") => { const A = ART[R.id];
+  return `<div class="photo ${mystery} ${A.fit==="contain"?"white":""}">${A.img ? `<img src="img/${A.img}" alt="" style="object-fit:${A.fit||"cover"};object-position:${A.pos||"50% 50%"}">` : `<div class="monoart an">${mystery ? "?" : A.mono}</div>`}</div>`; };
 
 // ---- build screens
 const stage = document.getElementById("stage");
 stage.insertAdjacentHTML("beforeend", `<div class="hud">
-  <div class="iq"><span class="k px">VC SCORE</span><span class="v" id="iq">0</span><span class="of px">/ ${MAXPTS}</span></div>
+  <div class="iq"><span class="k px">SCORE</span><span class="v" id="iq">0</span><span class="of px">/ ${MAXPTS}</span></div>
   <div class="mid"><div class="lvl px" id="lvl"></div><div class="pips">${ROUNDS.map(()=>`<i class="pip"></i>`).join("")}</div></div>
   <div class="right"><span class="chipx px" id="streak">STREAK 0</span><span class="chipx px rank" id="rank">INTERN</span></div></div>`);
-const screens = [], reachAt = {};
+const screens = [], revealAt = {}, endAt = {};
 function add(cls, html, opts={}) { const d=document.createElement("section"); d.className="scr "+cls; d.innerHTML=html; stage.appendChild(d); screens.push({el:d, ...opts}); return d; }
 
 add("full title", `
-  <div class="k px">10 startups · 2 calls each · names hidden</div>
-  <h1 class="an">Did it<br><span class="l">live</span> or<br><span class="d">die?</span></h1>
-  <div class="sub">Call the money. Call the ending.</div>
-  <div class="stones"><div class="stone"><b>R.I.P.</b><span class="px">$400M?</span></div><div class="trophy"><b>Still<br>alive</b><span class="px">$1B?</span></div></div>
+  <div class="k px">10 startups · 2 questions each · 20 points</div>
+  <h1 class="an">Did it <span class="l">live</span><br>or <span class="d">die?</span></h1>
+  <div class="sub">How much did it raise? Did it survive?</div>
   <div class="press px">▶ PRESS START</div>`, { kind:"title" });
 
-add("", `<div class="panel"><div class="kick px">Read this first · 1 of 3</div><h2 class="an">Startup money 101</h2>
-  <div class="rules">
-    <div class="rule"><div class="n px">Raised</div><div class="t">Sold a slice</div><div class="e">Investors hand over cash for a piece of the company. "Raised $100M" isn't sales or profit. It's money they have to spend well.</div></div>
-    <div class="rule"><div class="n px">Valuation</div><div class="t">A bet</div><div class="e">The price investors agreed on at the last deal. A $1B valuation isn't $1B in the bank, and it can go to zero.</div></div>
-    <div class="rule"><div class="n px">Bootstrapped</div><div class="t">No investors</div><div class="e">The company grows off what customers pay. Slower, but the founders keep it.</div></div>
-  </div>
-  <div class="rules-foot">Raising a lot is not the same as <em>winning.</em></div></div>`, { kind:"read" });
-
-add("", `<div class="panel"><div class="kick px">Read this first · 2 of 3</div><h2 class="an">Who raises big?</h2>
-  <div class="cheat">
+add("", `<div class="panel"><div class="kick px">Read this first · 1 of 2</div><h2 class="an">Who raises big?</h2>
+  <div class="defn"><b>Raised</b> means investors paid for a piece of the company. It isn't sales, and it isn't profit.</div>
+  <div class="cheat low">
     <div class="col ylw"><h3 class="px">Usually raises $50M+</h3>
-      <div class="tip"><i>1</i><div><b>Costly to build</b><span>Gadgets, robots and factories burn cash long before the first sale.</span></div></div>
-      <div class="tip"><i>2</i><div><b>Star founders</b><span>Investors chase people who've worked at Apple or Google.</span></div></div>
+      <div class="tip"><i>1</i><div><b>Costly to build</b><span>Gadgets, robots and factories burn cash before the first sale.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Star founders</b><span>Investors chase people who worked at Apple or Google.</span></div></div>
       <div class="tip"><i>3</i><div><b>A race to get huge</b><span>Apps that have to grab everyone before a rival does.</span></div></div>
     </div>
     <div class="col blu"><h3 class="px">Usually doesn't</h3>
       <div class="tip"><i>1</i><div><b>Cheap to start</b><span>A small product or simple software a few people can make.</span></div></div>
       <div class="tip"><i>2</i><div><b>Paid from day one</b><span>Customers fund it, so it never has to ask.</span></div></div>
-      <div class="tip"><i>3</i><div><b>Old or unsexy</b><span>Boring ideas and ones from before the VC boom get less attention.</span></div></div>
+      <div class="tip"><i>3</i><div><b>Old or unsexy</b><span>Boring ideas get less attention from investors.</span></div></div>
     </div>
-  </div>
-  <div class="cheat-foot">In this game: <em>4 gadgets, 4 apps and sites, 1 robot kitchen, 1 sponge.</em> 5 lived. 5 died.</div></div>`, { kind:"read" });
+  </div></div>`, { kind:"read" });
 
 // Patterns that predict a startup's fate. True in general, not an answer key: some rounds break them.
-const CHEAT = `<div class="kick px">Read this first · 3 of 3</div><h2 class="an">The cheat sheet</h2>
+const CHEAT = `<div class="kick px">Read this first · 2 of 2</div><h2 class="an">Who survives?</h2>
   <div class="cheat">
     <div class="col red"><h3 class="px">Usually dies</h3>
-      <div class="tip"><i>1</i><div><b>Hardware + a subscription</b><span>A pricey gadget that only works if you keep paying every month.</span></div></div>
-      <div class="tip"><i>2</i><div><b>Giant check, early</b><span>Hundreds of millions before it's clear people want it. Big money hides problems.</span></div></div>
-      <div class="tip"><i>3</i><div><b>"Uber for ___"</b><span>An app in the middle of a thin-margin business. Every order costs real money.</span></div></div>
-      <div class="tip"><i>4</i><div><b>Numbers nobody checked</b><span>Huge user counts with no proof people actually show up.</span></div></div>
+      <div class="tip"><i>1</i><div><b>Every sale costs too much</b><span>Hardware, drivers and robots eat the money before the company makes any.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Money before customers</b><span>A huge check before people really want it just hides the problem.</span></div></div>
+      <div class="tip"><i>3</i><div><b>Story bigger than the proof</b><span>Big promises and big user numbers, but no proof of real customers paying.</span></div></div>
     </div>
     <div class="col grn"><h3 class="px">Usually lives</h3>
-      <div class="tip"><i>1</i><div><b>Customers paid first</b><span>Real sales or a Kickstarter before the big investors showed up.</span></div></div>
-      <div class="tip"><i>2</i><div><b>Cheap + obvious</b><span>Easy to make, easy to explain in one sentence, easy to buy again.</span></div></div>
-      <div class="tip"><i>3</i><div><b>Built it for themselves</b><span>Founders solving their own problem usually understand the customer.</span></div></div>
-      <div class="tip"><i>4</i><div><b>Sold anyway</b><span>Got rejected or had a bad moment, and sales went up regardless.</span></div></div>
+      <div class="tip"><i>1</i><div><b>Customers paid early</b><span>Real sales came in before big investors showed up.</span></div></div>
+      <div class="tip"><i>2</i><div><b>Cheap + easy to explain</b><span>Simple to make, easy to get in one sentence, and people buy it again.</span></div></div>
+      <div class="tip"><i>3</i><div><b>Followed what users loved</b><span>They solved their own problem or moved toward what was already working.</span></div></div>
     </div>
   </div>
-  <div class="cheat-foot">Pivots go both ways: <em>followed their users?</em> lives. <em>Ran from the problem?</em> dies.</div>`;
+  <div class="cheat-foot">Some of these startups <em>break the rules.</em> That's the game.</div>`;
 add("", `<div class="panel">${CHEAT}</div>`, { kind:"read" });
 
-add("", `<div class="panel"><div class="kick px">How to play</div><h2 class="an">Two calls a round</h2>
-  <div class="rules">
-    <div class="rule"><div class="n px">Call 1 · the money</div><div class="t">Raised big?</div><div class="p">+2</div></div>
-    <div class="rule"><div class="n px">Call 2 · the ending</div><div class="t">Before the twist</div><div class="p">+3</div></div>
-    <div class="rule"><div class="n px">Or wait for the twist</div><div class="t">Play it safe</div><div class="p">+1</div></div>
-  </div>
-  <div class="rules-foot">Wrong = <em>zero.</em> No changing a call. The last round is worth <em>double.</em> Press H for the cheat sheet.</div></div>`, { kind:"rules" });
-
-function splash(R, ri) {
-  add("splash", `<div class="stripes" style="--lc:${R.lc};--lc2:${R.lc2}"></div>
-    <div class="inner"><div class="lv px">${R.boss ? "FINAL ROUND · 2X POINTS" : `ROUND ${num(ri)} / 10`}</div>
-      <div class="splash-t an">Startup #${num(ri)}</div><div class="sub">How much did it raise? How did it end?</div></div>
-    <div class="map"><div class="line"></div><div class="nodes">${ROUNDS.map((M,mi)=>`<div class="n ${M.boss?"boss":""}" data-i="${mi}"><b>${M.boss?"2X":mi+1}</b><span class="px">???</span></div>`).join("")}</div></div>`,
-    { kind:"splash", ri });
+const tagRow = (ri, q) => `<div class="tag"><span class="px">Startup ${ri+1} of 10</span><span class="px ol">Question ${q} of 2</span><span class="px ol hintkey" data-cheat>H · Hints</span></div>`;
+const QVARS = "--b:#151a35;--f:#ffffff";
+function moneyQ(R, ri) {
+  add("", `<div class="rv qc" style="${QVARS}">${photo(R,"m1")}
+    <div class="side">${tagRow(ri,1)}
+      <div class="what">${R.what}</div>
+      <div class="pays"><b>How it makes money:</b> ${R.pays}</div>
+      <div class="q an">How much did it raise?</div>
+      <div class="btns"><div class="pk big" data-p="1">$50M+<span class="key">A</span></div><div class="pk small" data-p="0">Under $50M<span class="key">D</span></div></div>
+    </div></div>`, { kind:"money", R, ri });
 }
-const fileTop = (R, ri, step) => `<div class="tab"><span class="px">CASE FILE</span><span class="px ol">${step}</span>${R.boss?`<span class="px x2">2X</span>`:""}</div>
-  <div class="codename an">Startup <em>#${num(ri)}</em></div>`;
-const hintKey = `<div class="hintkey px" data-cheat>H · Cheat sheet</div>`;
-function pitchScreen(R, ri) {
-  add("c1", `<div class="file">${fileTop(R, ri, "The pitch")}
-    <div class="clues">${clueBox("What it does", R.what, "new")}${clueBox("How it makes money", R.pays, "mid")}${clueBox("Why people believed it", R.why, "mid")}</div>
-    <div class="picks">
-      <div class="callq px">Call 1: the money</div>
-      <div class="pk big sm" data-p="big">Raised big<small>$50M or more</small><span class="key">A</span></div>
-      <div class="pk small sm" data-p="small">Barely raised<small>Under $50M</small><span class="key">D</span></div>
-      <div class="worth px">Right = <b>+${2*mult(R)}</b></div>
-      <div class="lockbadge px"></div>
-    </div>${hintKey}</div>`, { kind:"pitch", R, ri });
-}
-function fateScreen(R, ri, st) {
-  const money = `<div class="clue moneyblk ${st===1?"new":"old"}"><div class="h px"><i>The money</i><span class="mres"></span></div><div class="amt an">${R.raised}</div><div class="b">${R.money}</div></div>`;
-  add(st===1 ? "c1" : "c2", `<div class="file">${fileTop(R, ri, st===1 ? "The money" : "The twist")}
-    <div class="clues">${clueBox("What it does", R.what, "old")}${money}${st===2 ? clueBox("The twist", R.twist, "new") : ""}</div>
-    <div class="picks">
-      <div class="callq px">Call 2: the ending</div>
-      <div class="pk live" data-p="L">Lived<span class="key">A</span></div>
-      <div class="pk dead" data-p="D">Died<span class="key">D</span></div>
-      <div class="worth px">${st===1 ? "Call it now for" : "Last chance for"}<b>+${(st===1?3:1)*mult(R)}</b></div>
-      <div class="lockbadge px"></div>
-    </div>${hintKey}</div>`, { kind:"fate", R, ri, st });
+function endQ(R, ri) {
+  add("", `<div class="rv qc" style="${QVARS}">${photo(R,"m2")}
+    <div class="side">${tagRow(ri,2)}
+      <div class="res"></div>
+      <div class="amt2 an">${R.raised}</div>
+      <div class="pays">${R.money}</div>
+      <div class="pays tw"><b>The twist:</b> ${R.twist}</div>
+      <div class="q an">Did it survive?</div>
+      <div class="btns"><div class="pk live" data-p="1">Lived<span class="key">A</span></div><div class="pk dead" data-p="0">Died<span class="key">D</span></div></div>
+    </div></div>`, { kind:"end", R, ri });
 }
 function reveal(R, ri) {
   const dead = R.fate === "D";
-  add("", `<div class="rv" style="--b:${R.bg};--f:${R.fg}">
-    <div class="tag"><span class="px">Startup #${num(ri)}</span><span class="px ol">${R.yrs}</span></div>
-    ${R.was ? `<div class="was px">${R.was}</div>` : ""}
-    <div class="name an ${R.name.length>7?"l":""}">${R.name}</div>
-    <div class="stats">
-      <div class="st"><span class="px">Raised</span><b>${R.raised}</b></div>
-      <div class="st"><span class="px">${R.mid[0]}</span><b>${R.mid[1]}</b></div>
-      <div class="st now"><span class="px">Today</span><b>${R.today}</b></div>
+  add("", `<div class="rv rvl" style="--b:${R.bg};--f:${R.fg}">
+    <div class="rcol">
+      <div class="tag"><span class="px">Startup ${ri+1} of 10</span><span class="px ol">${R.yrs}</span>${R.was ? `<span class="px ol">${R.was}</span>` : ""}</div>
+      ${plate(R)}
+      <div class="stats">
+        <div class="st"><span class="px">Raised</span><b>${R.raised}</b></div>
+        <div class="st"><span class="px">${R.mid[0]}</span><b>${R.mid[1]}</b></div>
+        <div class="st now"><span class="px">Today</span><b>${R.today}</b></div>
+      </div>
+      <div class="roast an">${R.roast}</div>
+      <div class="story">${R.story}</div>
+      <div class="src px">Source: ${R.src}</div>
     </div>
-    <div class="roast an">${R.roast}</div>
-    <div class="story">${R.story}</div>
-    <div class="src px">Source: ${R.src}</div>
-    <div class="fate">${dead ? `<div class="stone"><b>R.I.P.</b><span class="px">${R.yrs.replace(/.*?(\d{4})$/,"$1")}</span></div>` : `<div class="trophy"><b>Still<br>alive</b><span class="px">${R.today}</span></div>`}</div>
-    <div class="you"></div><div class="plus"></div><div class="confetti"></div></div>`, { kind:"reveal", R, ri });
+    <div class="rpic">${photo(R)}
+      <div class="verdict"><div class="fate"><div class="bigstamp an ${dead?"d":"l"}">${dead?"Dead":"Alive"}</div></div><div class="you"></div></div>
+    </div></div>`, { kind:"reveal", R, ri });
 }
 function scoreboard(from, to, label) {
   add("", `<div class="panel"><div class="kick px">${label}</div><h2 class="an">${to===ROUNDS.length?"Part 2":"Part 1"} results</h2>
@@ -539,108 +600,80 @@ function scoreboard(from, to, label) {
 }
 
 ROUNDS.forEach((R, ri) => {
-  splash(R, ri);
-  pitchScreen(R, ri);
-  fateScreen(R, ri, 1);
-  fateScreen(R, ri, 2);
+  moneyQ(R, ri);
+  endQ(R, ri);
   reveal(R, ri);
   if (ri === HALF-1) scoreboard(0, HALF, "Halftime");
 });
 scoreboard(HALF, ROUNDS.length, "Game over");
-screens.forEach((s,i) => { if (s.kind==="reveal") reachAt[s.R.id] = i; });
-const moneyAt = R => reachAt[R.id] - 2;   // the money call is settled on the screen after the pitch
+screens.forEach((s,i) => { if (s.kind==="reveal") revealAt[s.R.id] = i; if (s.kind==="end") endAt[s.R.id] = i; });
 add("", `<div class="panel"><div class="kick px">Where they are today</div><h2 class="an">Graveyard vs. survivors</h2>
   <div class="yard"><div><h3 class="px dh">The graveyard</h3><div class="row" id="yd"></div></div><div><h3 class="px lh">Still alive</h3><div class="row" id="yl"></div></div></div>
   <div class="yard-foot">Nearly $1B raised by the dead ones. <em>The biggest winner raised $0.</em></div></div>`, { kind:"yard" });
-add("", `<div class="panel"><div class="fin-k px">Final VC score</div><div class="fin-v an"></div><div class="fin-r">Rank</div><div class="fin-rank an"></div>
-  <div class="ladder"></div><div class="fin-c px">▼ Comment your score</div></div>`, { kind:"final" });
+add("", `<div class="panel"><div class="fin-k px">Final score</div><div class="fin-v an"></div><div class="fin-r">Rank</div><div class="fin-rank an"></div>
+  <div class="ladder"></div><div class="vs"></div><div class="fin-c px">▼ Comment your score</div></div>`, { kind:"final" });
 
-// ---- HUD (money points land on the money screen, ending points on the reveal)
+// ---- HUD: a money point lands on the next slide, a survive point when the stamp hits
 let cur = 0;
 function hud(s, hold) {
-  const ri = s.ri ?? (["title","read","rules"].includes(s.kind) ? -1 : ROUNDS.length);
+  const ri = s.ri ?? (["title","read"].includes(s.kind) ? -1 : ROUNDS.length);
   let tot = 0, streak = 0;
   ROUNDS.forEach(R => {
-    if (moneyAt(R) <= cur) tot += moneyPts(R) || 0;
-    if (reachAt[R.id] > cur || (hold && reachAt[R.id] === cur)) return;
-    const p = fatePts(R); if (p == null) return; tot += p; streak = p ? streak+1 : 0; });
+    if (endAt[R.id] <= cur) { const m = moneyPt(R); if (m != null) { tot += m; streak = m ? streak+1 : 0; } }
+    if (revealAt[R.id] > cur || (hold && revealAt[R.id] === cur)) return;
+    const e = endPt(R); if (e != null) { tot += e; streak = e ? streak+1 : 0; } });
   const iq = document.getElementById("iq");
   if (iq.textContent !== String(tot)) { iq.textContent = tot; iq.classList.remove("bump"); void iq.offsetWidth; iq.classList.add("bump"); }
   const st = document.getElementById("streak");
   st.textContent = streak >= 2 ? `STREAK x${streak}` : `STREAK ${streak}`; st.classList.toggle("fire", streak >= 2);
   document.getElementById("rank").textContent = rankOf(tot).toUpperCase();
-  document.getElementById("lvl").textContent = ri < 0 ? "READ FIRST" : ri >= ROUNDS.length ? "GAME OVER" : `${ROUNDS[ri].boss ? "FINAL ROUND" : "ROUND " + (ri+1)} · ${ri < HALF ? "PART 1" : "PART 2"}`;
-  document.querySelectorAll(".pip").forEach((p,i)=>{ const R = ROUNDS[i], done = reachAt[R.id] <= cur && !(hold && reachAt[R.id] === cur), sc = fatePts(R);
+  document.getElementById("lvl").textContent = ri < 0 ? "READ FIRST" : ri >= ROUNDS.length ? "GAME OVER" : `STARTUP ${ri+1} OF 10 · ${ri < HALF ? "PART 1" : "PART 2"}`;
+  document.querySelectorAll(".pip").forEach((p,i)=>{ const R = ROUNDS[i], done = revealAt[R.id] <= cur && !(hold && revealAt[R.id] === cur), sc = roundPts(R);
     p.classList.toggle("ok", done && sc > 0); p.classList.toggle("no", done && sc === 0); p.classList.toggle("cur", i === ri && !done); });
 }
 
 // ---- renderers
-function renderSplash(s) {
-  s.el.querySelectorAll(".map .n").forEach(n => { const mi = +n.dataset.i, R = ROUNDS[mi], sc = fatePts(R);
-    n.classList.toggle("cur", mi === s.ri); n.classList.toggle("ok", mi < s.ri && sc > 0); n.classList.toggle("no", mi < s.ri && sc === 0);
-    n.querySelector("span").textContent = mi < s.ri ? R.name : "???"; });
+function renderQ(s) {
+  const a = s.kind==="money" ? S.money[s.R.id] : (S.end[s.R.id] == null ? null : S.end[s.R.id]==="L"), set = a != null;
+  s.el.querySelectorAll(".pk").forEach(p => { const mine = (p.dataset.p === "1") === a; p.classList.toggle("pick", set && mine); p.classList.toggle("off", set && !mine); });
+  if (s.kind==="end") { const m = moneyPt(s.R), res = s.el.querySelector(".res");
+    res.textContent = m == null ? "It raised" : m ? "Right! +1. It raised" : "Wrong. It raised";
+    res.className = "res px " + (m == null ? "" : m ? "ok" : "no"); }
 }
-function renderPitch(s) {
-  const v = S.raise[s.R.id], set = v != null, file = s.el.querySelector(".file");
-  file.classList.toggle("locked", set);
-  s.el.querySelectorAll(".pk").forEach(p => { const mine = (p.dataset.p === "big") === v; p.classList.toggle("pick", set && mine); p.classList.toggle("off", set && !mine); });
-  if (set) s.el.querySelector(".lockbadge").innerHTML = `Locked: ${MONEY[v]}`;
-}
-function renderFate(s) {
-  const R = s.R, L = S.lock[R.id], locked = L && L.stage <= s.st, file = s.el.querySelector(".file");
-  file.classList.toggle("locked", !!locked);
-  s.el.querySelectorAll(".pk").forEach(p => { p.classList.toggle("pick", !!locked && p.dataset.p === L.pick); p.classList.toggle("off", !!locked && p.dataset.p !== L.pick); });
-  if (locked) s.el.querySelector(".lockbadge").innerHTML = `Locked: ${FATE[L.pick]}<br>+${(L.stage===1?3:1)*mult(R)} if right`;
-  const p = moneyPts(R), res = s.el.querySelector(".mres");
-  res.textContent = p == null ? "" : p ? `Right +${p}` : `Wrong · ${MONEY[R.big]}`;
-  res.className = "mres " + (p == null ? "" : p ? "ok" : "no");
-}
-function pickMoney(s, big) {
-  if (S.raise[s.R.id] != null) return;   // no changing a call
-  S.raise[s.R.id] = big; save();
-  log("raise", { n:cur, round:s.R.id, big });
-  renderPitch(s);
-}
-function lock(s, pick) {
-  if (S.lock[s.R.id] && S.lock[s.R.id].stage <= s.st) return;
-  S.lock[s.R.id] = { pick, stage:s.st }; save();
-  log("lock", { n:cur, round:s.R.id, pick, stage:s.st });
-  renderFate(s);
-}
-function confetti(box) {
-  const cols = ["#ffd23f","#2fe07a","#ff3d7f","#4fd1ff","#ffffff","#ff8a1f"];
-  box.innerHTML = Array.from({length:80},()=>`<i style="left:${Math.random()*100}%;background:${cols[Math.random()*6|0]};--dx:${(Math.random()-.5)*400}px;--r:${Math.random()*900}deg;--t:${1.2+Math.random()*1.2}s;animation-delay:${Math.random()*.25}s"></i>`).join("");
+function answer(s, top) {
+  if (s.kind==="money" && S.money[s.R.id] == null) { S.money[s.R.id] = top; log("money", { n:cur, round:s.R.id, big:top }); }
+  else if (s.kind==="end" && S.end[s.R.id] == null) { S.end[s.R.id] = top ? "L" : "D"; log("end", { n:cur, round:s.R.id, pick:S.end[s.R.id] }); }
+  else return;
+  save(); renderQ(s);
+  setTimeout(() => { if (screens[cur] === s) show(cur+1); }, 600);   // one press per decision
 }
 function renderReveal(s) {
-  const R = s.R, L = S.lock[R.id], p = fatePts(R), el = s.el, rv = el.querySelector(".rv");
-  ["fate","you","plus"].forEach(c => el.querySelector("."+c).classList.remove("show"));
-  ["roast","story"].forEach(c => el.querySelector("."+c).classList.remove("show"));
-  el.querySelector(".confetti").innerHTML = ""; rv.classList.remove("shake");
+  const R = s.R, pick = S.end[R.id], p = endPt(R), el = s.el, rv = el.querySelector(".rv");
+  ["fate","you","roast","story"].forEach(c => el.querySelector("."+c).classList.remove("show"));
+  rv.classList.remove("shake");
   (s.timers || []).forEach(clearTimeout);
   // beats: raised -> middle number -> TODAY -> the stamp + result -> the roast and story
   s.timers = [
     setTimeout(() => { el.querySelector(".fate").classList.add("show");
-      if (L) { const you = el.querySelector(".you"), right = p > 0;
-        you.innerHTML = `<span class="me">${WHO} said ${FATE[L.pick]}</span><span class="vd" style="background:${right?"var(--live)":"var(--dead)"}">${right?"+"+p:"Wrong"}</span>`;
+      if (pick) { const you = el.querySelector(".you");
+        you.innerHTML = `<span class="me">${WHO} said ${FATE[pick]}</span><span class="vd" style="background:${p?"var(--live)":"var(--dead)"}">${p?"+1":"Wrong"}</span>`;
         you.classList.add("show");
-        if (right) { const pl = el.querySelector(".plus"); pl.textContent = `+${p}`; pl.classList.add("show"); if (L.stage === 1) confetti(el.querySelector(".confetti")); }
-        else { void rv.offsetWidth; rv.classList.add("shake"); } }
+        if (!p) { void rv.offsetWidth; rv.classList.add("shake"); } }
       hud(s); }, 2500),
     setTimeout(() => { el.querySelector(".roast").classList.add("show"); el.querySelector(".story").classList.add("show"); }, 3100),
   ];
 }
 function renderSB(s) {
-  const rs = ROUNDS.slice(s.from, s.to), cell = (txt, right) => `<span class="fl ${right==null?"":right?"L":"D"}">${txt}</span>`;
-  s.el.querySelector(".rows").innerHTML = `<div class="r hd"><span>Startup</span><span>Money call</span><span>Ending call</span><span>Today</span><span style="text-align:right">Pts</span></div>` +
-    rs.map(R => { const m = S.raise[R.id], L = S.lock[R.id], mp = moneyPts(R), fp = fatePts(R), p = roundPts(R);
-      return `<div class="r">${chip(R)}${cell(m==null?"—":MONEY[m], mp==null?null:mp>0)}${cell(L?FATE[L.pick]:"—", fp==null?null:fp>0)}<span class="g">${R.today}</span><span class="pp">${mp==null&&fp==null?"—":p?"+"+p:"0"}</span></div>`; }).join("");
-  const pts = rs.reduce((t,R)=>t+roundPts(R),0), mx = rs.reduce((t,R)=>t+5*mult(R),0);
-  const tot = ROUNDS.slice(0, s.to).reduce((t,R)=>t+roundPts(R),0), right = rs.filter(R=>fatePts(R)>0).length;
-  s.el.querySelector(".tot").innerHTML = `<div class="k px">${s.to===ROUNDS.length?"Part 2":"Part 1"}</div><div class="v">${pts}<small>/${mx}</small></div>
-    <div class="d">${right} of ${rs.length} endings right<br>Score so far: ${tot}<br>Rank: ${rankOf(tot)}</div>`;
+  const rs = ROUNDS.slice(s.from, s.to), cell = (txt, pt) => `<span class="fl ${pt==null?"":pt?"L":"D"}">${txt}</span>`;
+  s.el.querySelector(".rows").innerHTML = `<div class="r hd"><span>Startup</span><span>Raised</span><span>Survived</span><span>Today</span><span style="text-align:right">Pts</span></div>` +
+    rs.map(R => { const mp = moneyPt(R), ep = endPt(R);
+      return `<div class="r">${chip(R)}${cell(S.money[R.id]==null?"—":MONEY[S.money[R.id]], mp)}${cell(S.end[R.id]?FATE[S.end[R.id]]:"—", ep)}<span class="g">${R.today}</span><span class="pp">${mp==null&&ep==null?"—":roundPts(R)}</span></div>`; }).join("");
+  const pts = rs.reduce((t,R)=>t+roundPts(R),0), tot = ROUNDS.slice(0, s.to).reduce((t,R)=>t+roundPts(R),0);
+  s.el.querySelector(".tot").innerHTML = `<div class="k px">${s.to===ROUNDS.length?"Part 2":"Part 1"}</div><div class="v">${pts}<small>/${rs.length*2}</small></div>
+    <div class="d">Total: ${tot} / ${MAXPTS}<br>Rank: ${rankOf(tot)}</div>`;
 }
 function renderYard(s) {
-  const tile = (R,k) => { const p = fatePts(R), mk = p==null ? "" : `<div class="mk" style="background:${p>0?"var(--live)":"var(--dead)"}">${p>0?"✓":"✗"}</div>`;
+  const tile = (R,k) => { const p = endPt(R), mk = p==null ? "" : `<div class="mk" style="background:${p?"var(--live)":"var(--dead)"}">${p?"✓":"✗"}</div>`;
     return `<div class="tile ${R.fate==="L"?"w":""}" style="animation-delay:${k*.12}s"><b>${R.name}</b><span class="px">${R.raised}</span>${mk}</div>`; };
   s.el.querySelector("#yd").innerHTML = ROUNDS.filter(R=>R.fate==="D").map(tile).join("");
   s.el.querySelector("#yl").innerHTML = ROUNDS.filter(R=>R.fate==="L").map(tile).join("");
@@ -650,6 +683,8 @@ function renderFinal(s) {
   s.el.querySelector(".fin-v").innerHTML = `${tot}<small>/${MAXPTS}</small>`;
   s.el.querySelector(".fin-rank").textContent = r;
   s.el.querySelector(".ladder").innerHTML = RANKS.map(([n,t])=>`<div class="px ${n===r?"me":""}"><span>${n}</span><span>${Math.ceil(t*MAXPTS)}+</span></div>`).join("");
+  const REID = 16, msg = tot > REID ? "You beat Reid. Tell him in the comments." : tot === REID ? "You tied Reid. Tell him in the comments." : "Reid wins this one.";
+  s.el.querySelector(".vs").innerHTML = `<div class="k px">Reid got</div><div class="v">${REID} / ${MAXPTS} · VP</div><div class="d">${msg}</div>`;
 }
 
 // ---- navigation
@@ -657,26 +692,19 @@ function show(n) {
   cur = Math.max(0, Math.min(screens.length-1, n));
   screens.forEach((s,i)=>s.el.classList.toggle("on", i===cur));
   const s = screens[cur];
-  log("screen", { n:cur, kind:s.kind, round:s.R?.id, stage:s.st });
-  if (s.kind==="splash") renderSplash(s);
-  if (s.kind==="pitch") renderPitch(s);
-  if (s.kind==="fate") renderFate(s);
+  log("screen", { n:cur, kind:s.kind, round:s.R?.id });
+  if (s.kind==="money" || s.kind==="end") renderQ(s);
   if (s.kind==="sb") renderSB(s);
   if (s.kind==="yard") renderYard(s);
   if (s.kind==="final") renderFinal(s);
   hud(s, s.kind==="reveal");
   if (s.kind==="reveal") renderReveal(s);
 }
-function nudge(s) { const pk = s.el.querySelector(".picks"); pk.classList.remove("nudge"); void pk.offsetWidth; pk.classList.add("nudge"); }
 function next() {
   const s = screens[cur];
-  if (s.kind==="pitch" && S.raise[s.R.id] == null) return nudge(s);
-  if (s.kind==="fate" && s.st===2 && !S.lock[s.R.id]) return nudge(s);   // the twist is the last chance to call it
+  const open = (s.kind==="money" && S.money[s.R.id] == null) || (s.kind==="end" && S.end[s.R.id] == null);
+  if (open) { const b = s.el.querySelector(".btns"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); return; }
   show(cur+1);
-}
-function answer(s, a) {   // a: true for the top button
-  if (s.kind==="pitch") pickMoney(s, a);
-  if (s.kind==="fate") lock(s, a ? "L" : "D");
 }
 
 stage.insertAdjacentHTML("beforeend", `<div id="cheatlay"><div class="panel">${CHEAT}</div></div>`);
@@ -685,26 +713,26 @@ function toggleCheat(on = !cheatlay.classList.contains("on")) { cheatlay.classLi
 
 document.addEventListener("keydown", e => {
   document.getElementById("help").style.display = "none";
-  if (e.key==="h" || e.key==="H") return toggleCheat();
+  const k = e.key.toLowerCase();
+  if (k==="h") return toggleCheat();
   if (cheatlay.classList.contains("on")) { if (e.key==="Escape" || e.key===" " || e.key==="Enter" || e.key==="ArrowRight") { e.preventDefault(); toggleCheat(false); } return; }
-  const s = screens[cur], k = e.key.toLowerCase();
+  const s = screens[cur];
   if (k==="a" || k==="d") return answer(s, k==="a");
   if (e.key==="ArrowRight" || e.key===" " || e.key==="Enter") { e.preventDefault(); next(); }
   if (e.key==="ArrowLeft") show(cur-1);
   if (k==="f") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
-  if (k==="r") { S = { raise:{}, lock:{} }; save(); log("reset"); show(0); }
+  if (k==="r") { S = { money:{}, end:{} }; save(); log("reset"); show(0); }
 });
 stage.addEventListener("click", e => {
   if (cheatlay.classList.contains("on")) return toggleCheat(false);
   if (e.target.closest("[data-cheat]")) return toggleCheat(true);
   const s = screens[cur], pk = e.target.closest(".pk");
-  if (pk) return answer(s, pk.dataset.p==="big" || pk.dataset.p==="L");
+  if (pk) return answer(s, pk.dataset.p==="1");
   next();
 });
 
-function fit() { const k = Math.min(document.documentElement.clientWidth/1920, document.documentElement.clientHeight/1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+function fit() { const k = Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
 // show.html#12 jumps straight to screen 12 (to pick back up mid-take)
 addEventListener("resize", fit); fit(); show(parseInt(location.hash.slice(1)) || 0);
 </script>
-</body>
-</html>
+<a href="../" style="position:fixed;right:12px;bottom:12px;z-index:50;font:900 12px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#f4f1ea;background:rgba(0,0,0,.55);padding:9px 12px;text-decoration:none;border-radius:6px">&larr; All games</a>
