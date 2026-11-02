@@ -1,0 +1,75 @@
+// Me vs. Claude data. ANSWER KEY and CLAUDE'S SEALED BRANDS: don't open before recording.
+// Keep ASCII-only. Real facts checked Oct 2026, sources in research.md.
+// fake = index of Claude's card. accuse = the card Claude blames; it lies unless accuse === fake.
+const ROUNDS = [
+  { id:"pets", theme:"Pets", fake:1, accuse:0, claim:"I'd never write a dog airline. It's too obvious. Card A is mine.",
+    fooled:"I blamed the real one and you thanked me for it.", caught:"You ignored me. Rude, but correct.",
+    cards:[
+      { name:"BARK Air", img:"barkair.jpg", what:"An airline built for dogs. The dog is the passenger and you're the plus-one.", pays:"selling seats on chartered jets.",
+        fact:"Flights run $7,075 to $14,550 one way, and the drinks come in bowls.", src:"NPR \u00b7 air.bark.co" },
+      { img:"gen/f_cat.jpg", what:"A hotel for cats with no staff. Robots feed them and clean the litter, and you check in by webcam.", pays:"charging $60 a night per cat." },
+      { name:"DOGTV", img:"dogtv.jpg", what:"A 24/7 TV channel made for dogs left home alone.", pays:"subscriptions and cable deals.",
+        fact:"It's on DirecTV and Dish. The founder got the idea from videos he edited for his cat.", src:"Wikipedia \u00b7 dogtv.com" },
+    ] },
+  { id:"space", theme:"Space", fake:0, accuse:0, claim:"Honestly? Card A is mine. I'm telling you so you'll trust me later.",
+    note:"Home insurance usually covers falling objects already.",
+    fooled:"I told you the answer and you still didn't believe me.", caught:"Good. You trust me now. Remember that.",
+    cards:[
+      { img:"gen/f_asteroid.jpg", what:"Asteroid insurance. If a space rock hits your house, you get paid. Members get a real meteorite.", pays:"charging $9 a month." },
+      { name:"Reflect Orbital", img:"reflect.jpg", what:"Mirrors in orbit that bounce sunlight down to Earth after dark.", pays:"selling sunlight by the hour.",
+        fact:"Plans to charge up to $5,000 an hour. The FCC approved its first test satellite in July 2026.", src:"Dezeen \u00b7 Wikipedia" },
+      { name:"Interlune", img:"interlune.jpg", what:"Plans to mine helium from the moon and sell it to quantum computer companies.", pays:"selling it before it's mined.",
+        fact:"It has mined nothing so far. One founder actually walked on the moon. Image is a concept render.", src:"TechCrunch \u00b7 interlune.space" },
+    ] },
+  { id:"food", theme:"Food", fake:1, accuse:2, claim:"A mammoth meatball? Come on. I got carried away. Card C is mine.",
+    fooled:"The meatball was real. The lunch gum was me.", caught:"You'd have eaten that meatball, wouldn't you?",
+    cards:[
+      { name:"Savor", img:"savor.jpg", what:"Butter made from carbon and hydrogen. No cows and no plants.", pays:"selling fats to restaurants and bakeries.",
+        fact:"Backed by Bill Gates's Breakthrough Energy. A bill in Congress would force \"lab-created\" labels on it.", src:"Food Dive \u00b7 Green Queen" },
+      { img:"gen/f_gum.jpg", what:"Chewing gum that replaces lunch. One stick holds 600 calories and releases them slowly.", pays:"shipping monthly packs to offices." },
+      { name:"Vow", img:"vow.jpg", what:"Grows meat from animal cells, and once made a giant meatball using mammoth DNA.", pays:"selling lab-grown quail to restaurants.",
+        fact:"The meatball was a stunt and nobody has ever eaten it. The real product is quail.", src:"Wikipedia \u00b7 NPR" },
+    ] },
+  { id:"health", theme:"Health", fake:2, accuse:0, claim:"An AI camera in your toilet is the dumbest thing I've ever written. Card A.",
+    fooled:"Please don't mail anyone your earwax.", caught:"The toilet camera is real. I'm as upset as you are.",
+    cards:[
+      { name:"Throne", img:"throne.jpg", pos:"88% 0%", what:"A camera that clips onto your toilet and uses AI to analyze what you leave behind.", pays:"$399, then $6 a month.",
+        fact:"Raised nearly $18M. It started as a joke at a poker night.", src:"Crunchbase News \u00b7 The Hustle" },
+      { name:"Legacy", img:"legacy.jpg", fit:true, what:"Mails you a kit to test your sperm at home, then freezes and stores it.", pays:"selling kits, plus yearly storage.",
+        fact:"It put out a press release celebrating over one trillion sperm frozen.", src:"PR Newswire \u00b7 givelegacy.com" },
+      { img:"gen/f_earwax.jpg", what:"Mail in your earwax and get a personal health report.", pays:"$79 a kit, plus a yearly plan." },
+    ] },
+  { id:"nobody", theme:"Nobody should sell this", fake:0, accuse:0, claim:"Last one, so no games. It's Card A. Would I lie to you?",
+    fooled:"You finally stopped trusting me, and that's when I told the truth.", caught:"You trusted me at the right time. That was the hard part.",
+    cards:[
+      { img:"gen/f_roll.jpg", what:"Anonymously mails someone a stale dinner roll every month until they apologize.", pays:"charging $12 a roll." },
+      { name:"Make Sunsets", img:"gen/sunsets_crop.jpg", what:"Balloons release sulfur dioxide high in the sky, and you buy \"cooling credits\" for it.", pays:"selling cooling credits.",
+        fact:"Its CEO called it \"partly a company and partly a cult.\" It's under EPA scrutiny, and the credits are unproven.", src:"MIT Technology Review \u00b7 EPA" },
+      { name:"Potato Parcel", img:"potatoparcel.jpg", what:"Mails a real potato with your message on it. You can stay anonymous.", pays:"$21.99 a potato.",
+        fact:"Kevin O'Leary invested on Shark Tank and called it his \"best pitch for the worst product.\"", src:"CNBC \u00b7 Food Republic" },
+    ] },
+];
+
+// Part 2 wheel. Claude's brand for every product is written before you spin, so it can't copy you.
+const PRODUCTS = [
+  { id:"sauce", name:"Hot sauce", packs:["sauce_a","sauce_b","sauce_c"],
+    audiences:["Spice nerds who read Scoville charts","Gym guys counting macros","Parents who want flavor, not pain","College kids on a budget"],
+    prices:["$6","$9","$14","$22"],
+    claude:{ name:"Second Thoughts", pack:"sauce_x", audience:"People who order extra hot to impress someone", price:"$11", tagline:"You'll have them.",
+      pitch:"Every hot sauce brags. Second Thoughts warns you. It's a small-batch habanero with a label that reads like a liability waiver, made for anyone who orders extra hot and regrets it two bites later. Eleven dollars a bottle. Buy one for yourself. Buy one for your friend who says nothing's too spicy. Then film it." } },
+  { id:"deo", name:"Deodorant", packs:["deo_a","deo_b","deo_c"],
+    audiences:["Guys who hit the gym before work","Teens buying their first one","Men over 40 who read ingredients","Serious lifters"],
+    prices:["$8","$12","$16","$24"],
+    claude:{ name:"Clean Getaway", pack:"deo_x", audience:"Guys going straight from the gym to a date", price:"$14", tagline:"Leave no evidence.",
+      pitch:"You've got twelve minutes between the gym and dinner. No shower. No problem. Clean Getaway is an all-day deodorant in a matte black stick that fits in your gym bag, your glovebox and your pocket. Fourteen dollars. It doesn't smell like a body spray commercial. It smells like you were never there." } },
+  { id:"socks", name:"Socks", packs:["socks_a","socks_b","socks_c"],
+    audiences:["Office guys who want one fun thing","Runners","People buying a gift","Streetwear kids"],
+    prices:["$12","$18","$25","$38"],
+    claude:{ name:"Third Sock", pack:"socks_x", audience:"Anyone who has ever lost one sock", price:"$22", tagline:"Because you always lose one.",
+      pitch:"Your dryer has been stealing from you for years. Third Sock fights back. Every pack comes with three identical socks, not two, so when one disappears, you've still got a pair. Twenty-two dollars. Same great sock, one built-in backup. It's the first sock brand that planned for failure." } },
+  { id:"treats", name:"Dog treats", packs:["treats_a","treats_b","treats_c"],
+    audiences:["New puppy parents","Owners of picky eaters","Dog moms who buy organic","Serious dog trainers"],
+    prices:["$7","$12","$18","$28"],
+    claude:{ name:"Bribe", pack:"treats_x", audience:"Owners whose dog only listens for food", price:"$12", tagline:"Every dog has a price.",
+      pitch:"Your dog doesn't respect you. Your dog respects food. Bribe is a single-ingredient beef treat in a brown paper envelope, like the deal you're actually making. Sit? That's one. Stay? That's two. Twelve dollars a bag. Stop calling it training. You're running a very small criminal operation, and business is good." } },
+];
