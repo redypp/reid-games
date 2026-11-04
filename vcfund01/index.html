@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="Invest $10M in 10 fake startups, then $10M in 10 real ones with the names hidden. See what your fund is worth today and if you beat Reid.">
+<title>Fake VC Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root { --night:#0b0d17; --ink:#f4f1ea; --dim:#8a8fa8; --neon:#ffd23f; --cash:#2fe07a; --bad:#ff4a3a; --card:#1c2148; --paper:#efe6d2; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; background:#000; overflow:hidden; }
+  body { font-family:"Archivo","Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+  .px { font-family:"Press Start 2P",monospace; letter-spacing:.04em; }
+  .an { font-family:"Anton",Impact,sans-serif; text-transform:uppercase; line-height:.95; font-weight:400; }
+
+  #stage { position:fixed; left:50%; top:50%; width:1920px; height:1080px; overflow:hidden; transform-origin:center;
+    background:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0/64px 64px,
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/64px 64px,
+      radial-gradient(1300px 760px at 50% 45%, #14302a, #0b0d17 70%); }
+
+  .hud { position:absolute; left:0; right:0; top:0; height:96px; z-index:10; display:grid; grid-template-columns:520px 1fr 520px; align-items:center;
+    padding:0 44px; background:#090b14; border-bottom:2px solid rgba(255,255,255,.08); }
+  .side-s { display:flex; align-items:center; gap:18px; }
+  .side-s.c { justify-content:flex-end; }
+  .side-s .k { font-size:15px; color:var(--cash); } .side-s.c .k { color:var(--neon); }
+  .side-s .v { font-family:"Anton",Impact,sans-serif; font-size:62px; line-height:1; color:#fff; }
+  .side-s .v.bump { animation:bump .5s ease-out; }
+  @keyframes bump { 30% { transform:scale(1.3); color:var(--neon); } }
+  .mid { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .lvl { font-size:13px; color:#fff; }
+  .pips { display:flex; gap:8px; }
+  .pip { width:38px; height:12px; border-radius:6px; background:rgba(255,255,255,.13); }
+  .pip.y { background:var(--cash); } .pip.cur { background:var(--neon); box-shadow:0 0 16px var(--neon); }
+
+  .scr { position:absolute; left:0; right:0; top:96px; bottom:0; display:none; }
+  .scr.on { display:block; }
+  .scr.full { top:0; z-index:15; }
+  .panel { position:absolute; left:56px; right:56px; top:30px; bottom:46px; border-radius:40px; background:#121633; overflow:hidden;
+    box-shadow:0 18px 0 rgba(0,0,0,.45), inset 0 0 0 4px rgba(255,255,255,.1); }
+  .scr.on .panel { animation:cardIn .4s cubic-bezier(.2,1.2,.4,1); }
+  .kick { position:absolute; left:64px; top:52px; font-size:16px; color:var(--neon); }
+  .panel h2 { position:absolute; left:64px; top:96px; font-size:116px; color:#fff; }
+  @keyframes cardIn { from { transform:translateY(50px) scale(.95); opacity:0; } to { transform:none; opacity:1; } }
+  @keyframes slam { from { transform:scale(1.7) rotate(-3deg); opacity:0; } to { transform:none; opacity:1; } }
+  @keyframes blink { 50% { opacity:0; } }
+  @keyframes nudge { 20%,60% { transform:translateX(-12px); } 40%,80% { transform:translateX(12px); } }
+
+  .title { background:radial-gradient(1200px 700px at 30% 40%, #123a2a, #0b0d17 70%); }
+  .title .k { position:absolute; left:110px; top:130px; font-size:22px; color:var(--neon); }
+  .title h1 { position:absolute; left:100px; top:190px; font-size:250px; color:#fff; }
+  .title h1 .m { color:var(--cash); }
+  .title .sub { position:absolute; left:110px; top:770px; font-size:50px; font-weight:900; color:#fff; }
+  .title .press { position:absolute; left:110px; bottom:100px; font-size:22px; color:#fff; animation:blink 1.1s steps(2) infinite; }
+
+  .rules { position:absolute; left:64px; right:64px; top:260px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .rule { border-radius:28px; background:var(--card); padding:34px; height:420px; display:flex; flex-direction:column; gap:20px; opacity:.14; transition:opacity .3s; }
+  .rule.show { opacity:1; }
+  .rule .n { font-size:15px; color:var(--neon); }
+  .rule .t { font-family:"Anton",Impact,sans-serif; font-size:78px; color:#fff; line-height:1; text-transform:uppercase; }
+  .rule .e { margin-top:auto; font-size:31px; font-weight:700; color:#d5d8ea; line-height:1.25; }
+  .foot { position:absolute; left:64px; right:64px; bottom:50px; font-family:"Anton",Impact,sans-serif; font-size:50px; text-transform:uppercase; color:#fff; line-height:1.05; }
+  .foot em { font-style:normal; color:var(--neon); }
+  .foot.hide { opacity:0; }
+
+  .tips { position:absolute; left:64px; right:64px; top:248px; display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
+  .tip { border-radius:22px; background:var(--card); padding:24px 30px; }
+  .tip b { display:block; font-family:"Anton",Impact,sans-serif; font-weight:400; font-size:48px; text-transform:uppercase; color:#fff; line-height:1; }
+  .tip span { display:block; font-size:28px; font-weight:700; color:#c9cde0; line-height:1.25; margin-top:8px; }
+  #hintlay { position:absolute; inset:0; z-index:18; background:rgba(8,10,20,.94); display:none; }
+  #hintlay.on { display:block; }
+
+  .splash .big { position:absolute; left:64px; top:150px; font-size:170px; color:#fff; }
+  .splash .big em { font-style:normal; color:var(--cash); }
+  .splash .sub { position:absolute; left:66px; top:520px; width:1500px; font-size:44px; font-weight:900; color:#d5d8ea; line-height:1.25; }
+  .press2 { position:absolute; left:66px; bottom:60px; font-size:18px; color:#fff; animation:blink 1.1s steps(2) infinite; }
+
+  /* pitch */
+  .ptop { position:absolute; left:48px; right:48px; top:32px; display:flex; align-items:center; gap:16px; }
+  .chipx { font-size:14px; padding:12px 16px; border-radius:10px; background:rgba(255,255,255,.1); color:#fff; }
+  .chipx.hk { margin-left:auto; cursor:pointer; }
+  .deal { position:absolute; left:48px; right:48px; top:92px; bottom:172px; display:grid; grid-template-columns:600px minmax(0,1fr); gap:30px; }
+  .shot { display:flex; flex-direction:column; gap:18px; min-height:0; }
+  .pic { flex:1; min-height:0; border-radius:24px; overflow:hidden; background:#000; }
+  .pic img { width:100%; height:100%; object-fit:cover; display:block; }
+  .pic.blur img { filter:blur(26px) saturate(.75); transform:scale(1.2); }
+  .nophoto { height:100%; display:flex; align-items:center; justify-content:center; font-size:160px; color:var(--dim); }
+  .price { flex:none; border-radius:20px; background:var(--card); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+  .price .l { font-size:13px; color:var(--neon); }
+  .price .n { font-family:"Anton",Impact,sans-serif; font-size:62px; line-height:1; color:#fff; }
+  .sheet { border-radius:24px; background:var(--paper); color:#1a1712; padding:26px 32px; display:flex; flex-direction:column; gap:15px; min-width:0; min-height:0; }
+  .sheet .one { font-size:44px; font-weight:900; line-height:1.12; flex:none; padding-bottom:6px; }
+  .ln { display:grid; grid-template-columns:150px minmax(0,1fr); gap:16px; align-items:baseline; }
+  .ln .l { font-size:11px; line-height:1.4; color:#6b6454; }
+  .ln .t { font-size:30px; font-weight:700; line-height:1.2; }
+  .ln.bull .l { color:#14763c; } .ln.bear .l { color:#c02b1e; }
+  .checks { position:absolute; left:48px; right:48px; bottom:28px; height:124px; display:grid; grid-template-columns:repeat(8,1fr); gap:12px; }
+  .ck { border-radius:18px; background:var(--card); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer; box-shadow:0 8px 0 rgba(0,0,0,.35); }
+  .ck .key { font-size:12px; color:var(--neon); }
+  .ck .amt { font-family:"Anton",Impact,sans-serif; font-size:46px; line-height:1; text-transform:uppercase; }
+  .ck.sel { background:var(--neon); color:#111; } .ck.sel .key { color:#111; }
+  .ck.locked { background:var(--cash); color:#0b2a17; } .ck.locked .key { color:#0b2a17; }
+  .ck.off { opacity:.22; cursor:default; }
+  .nudge { animation:nudge .4s; }
+
+  /* reveal */
+  .rv { position:absolute; left:48px; right:48px; top:92px; bottom:36px; display:grid; grid-template-columns:600px minmax(0,1fr); gap:30px; }
+  .rv .shot .pic { flex:1; }
+  .logo { flex:none; height:120px; border-radius:20px; background:#fff; display:flex; align-items:center; justify-content:center; padding:14px 30px; }
+  .logo img { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+  .rs { display:flex; flex-direction:column; gap:16px; min-width:0; min-height:0; }
+  .tagline { display:flex; align-items:center; gap:16px; flex:none; }
+  .tag { font-size:14px; padding:11px 14px; border-radius:8px; background:var(--cash); color:#0b2a17; }
+  .tag.dead { background:var(--bad); color:#2a0b0b; }
+  .rv .nm { font-size:104px; color:#fff; flex:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tiles { display:grid; grid-template-columns:1fr 1fr 1.25fr; gap:16px; flex:none; }
+  .tl { border-radius:20px; background:var(--card); padding:18px 20px; display:flex; flex-direction:column; gap:12px; min-width:0; visibility:hidden; }
+  .tl.show { visibility:visible; animation:slam .4s cubic-bezier(.2,1.5,.4,1); }
+  .tl .l { font-size:12px; line-height:1.4; color:var(--dim); }
+  .tl .n { font-family:"Anton",Impact,sans-serif; font-size:92px; line-height:1; color:#fff; white-space:nowrap; }
+  .tl.up .n { color:var(--cash); } .tl.down .n { color:var(--bad); }
+  .tell { display:flex; flex-direction:column; gap:12px; visibility:hidden; flex:1; min-height:0; }
+  .tell.show { visibility:visible; }
+  .tell .roast { font-family:"Anton",Impact,sans-serif; text-transform:uppercase; font-size:46px; line-height:1.05; color:var(--neon); }
+  .tell .st { font-size:30px; font-weight:700; line-height:1.25; color:#e5e6f2; }
+  .tell .lesson { font-size:30px; font-weight:900; line-height:1.2; color:var(--cash); }
+  .tell .src { margin-top:auto; font-size:10px; line-height:1.6; color:var(--dim); }
+
+  /* results */
+  .res-k { position:absolute; left:64px; top:96px; font-size:40px; font-weight:900; color:#d5d8ea; }
+  .res-v { position:absolute; left:60px; top:160px; font-size:330px; color:var(--cash); white-space:nowrap; }
+  .res-v.down { color:var(--bad); }
+  .res-m { position:absolute; left:66px; top:560px; font-size:64px; color:#fff; }
+  .res-e { position:absolute; left:66px; top:650px; width:1600px; font-size:38px; font-weight:900; line-height:1.25; color:#d5d8ea; }
+  .lessons { position:absolute; left:64px; right:64px; top:236px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-flow:column; grid-template-rows:repeat(5,106px); gap:12px 20px; }
+  .ls { display:grid; grid-template-columns:minmax(0,1fr) auto; align-content:center; gap:6px 16px; border-radius:18px; background:var(--card); padding:0 24px; }
+  .ls .a { font-family:"Anton",Impact,sans-serif; text-transform:uppercase; font-size:34px; line-height:1; color:#fff; }
+  .ls .b { font-family:"Anton",Impact,sans-serif; font-size:36px; line-height:1; color:var(--bad); }
+  .ls .b.up { color:var(--cash); }
+  .ls .c { grid-column:1 / -1; font-size:24px; font-weight:700; line-height:1.15; color:#d5d8ea; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .grid6 { position:absolute; left:64px; right:64px; top:236px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .rc { border-radius:24px; background:var(--card); padding:24px 28px; height:290px; display:flex; flex-direction:column; gap:12px; min-width:0; opacity:0; }
+  .rc.show { opacity:1; animation:cardIn .4s ease-out; }
+  .rc .l { font-size:13px; color:var(--neon); }
+  .rc .n { font-family:"Anton",Impact,sans-serif; font-size:96px; line-height:1; color:#fff; white-space:nowrap; overflow:hidden; }
+  .rc .n.sm { font-size:70px; text-transform:uppercase; }
+  .rc .d { margin-top:auto; font-size:27px; font-weight:700; line-height:1.2; color:#c9cde0; }
+  .fin-k { position:absolute; left:64px; top:90px; font-size:18px; color:var(--neon); }
+  .fin-v { position:absolute; left:60px; top:140px; font-size:230px; color:#fff; white-space:nowrap; }
+  .fin-rank { position:absolute; left:60px; top:420px; width:1680px; font-size:170px; color:var(--neon); }
+  .scr.on .fin-rank { animation:slam .6s .3s cubic-bezier(.2,1.5,.4,1) backwards; }
+  .fin-l { position:absolute; left:66px; top:790px; width:1600px; font-size:40px; font-weight:900; line-height:1.25; color:#d5d8ea; }
+  #help { position:fixed; bottom:8px; left:10px; color:#777; font:12px Helvetica; z-index:30; }
+  /* Reid's fund, final screen only */
+  .vs { position:absolute; right:64px; top:90px; width:560px; border-radius:22px; background:var(--neon); color:#111; padding:24px 28px; }
+  .vs .k { font-size:14px; }
+  .vs .v { font-family:"Anton",Impact,sans-serif; font-size:84px; line-height:1; margin-top:12px; }
+  .vs .d { font-weight:900; font-size:27px; line-height:1.2; margin-top:10px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="help">Tap a check, tap it again to lock it (or 0-7, Enter) · tap or → to continue · H = hints · ← back · R restart</div>
+
+<script src="training.js"></script>
+<script src="real.js"></script>
+<script>
+const FUND = 10000000;
+const ROUND = { t:{ list:TRAIN, label:"TRAINING FUND", word:"Startup" }, r:{ list:REAL, label:"THE REAL FUND", word:"Startup" } };
+const CHECKS = [0, 250000, 500000, 1000000, 2000000, 3000000, 5000000, "all"];
+
+function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function safeSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+const blank = () => ({ t:{}, r:{} });
+let S = Object.assign(blank(), JSON.parse(safeGet("fakeVcFund") || "null") || {});
+const save = () => safeSet("fakeVcFund", JSON.stringify(S));
+const log = () => null;                             // the public copy logs nothing
+
+const trim = n => String(+n.toFixed(n < 10 ? 2 : n < 100 ? 1 : 0));
+const money = n => n >= 1e9 ? `$${trim(n/1e9)}B` : n >= 1e6 ? `$${trim(n/1e6)}M` : n >= 1e3 ? `$${Math.round(n/1e3)}K` : `$${Math.round(n)}`;
+const times = m => `${m >= 1000 ? Math.round(m).toLocaleString("en-US") : +m.toFixed(m < 10 ? 2 : 1)}x`;
+
+const put = (rk, c) => S[rk][c.slot] || 0;
+const cashLeft = rk => FUND - Object.values(S[rk]).reduce((a,b) => a+b, 0);
+const deals = rk => Object.values(S[rk]).filter(Boolean).length;
+// reveals run smallest multiple to biggest, so the fund climbs toward the end
+const order = rk => [...ROUND[rk].list].sort((a,b) => a.multiple - b.multiple || put(rk,a) - put(rk,b));
+const fundAfter = (rk, n) => cashLeft(rk) + order(rk).slice(0, n).reduce((v,c) => v + put(rk,c) * c.multiple, 0);
+const fundFinal = rk => fundAfter(rk, ROUND[rk].list.length);
+const evenSplit = rk => { const L = ROUND[rk].list; return L.reduce((v,c) => v + FUND / L.length * c.multiple, 0); };
+
+const stage = document.getElementById("stage");
+stage.insertAdjacentHTML("beforeend", `<div class="hud">
+  <div class="side-s"><span class="k px" id="lk"></span><span class="v" id="lv"></span></div>
+  <div class="mid"><div class="lvl px" id="lvl"></div><div class="pips" id="pips"></div></div>
+  <div class="side-s c"><span class="v" id="rv"></span><span class="k px" id="rk"></span></div></div>`);
+const screens = [];
+function add(cls, html, opts={}) { const d=document.createElement("section"); d.className="scr "+cls; d.innerHTML=html; stage.appendChild(d); screens.push({el:d, ...opts}); return d; }
+const splash = (kick, big, sub, rk) => add("", `<div class="panel splash"><div class="kick px">${kick}</div><div class="big an">${big}</div><div class="sub">${sub}</div><div class="press2 px">▶ PRESS SPACE</div></div>`, { kind:"read", rk });
+
+add("full title", `
+  <div class="k px">Fake money · real startups · real results</div>
+  <h1 class="an">I invested<br><span class="m">$10M</span> in 10<br>startups</h1>
+  <div class="press px">▶ PRESS START</div>`, { kind:"title" });
+
+add("", `<div class="panel"><div class="kick px">How it works</div><h2 class="an">Two funds. One score.</h2>
+  <div class="rules">
+    <div class="rule"><div class="n px">Fund 1</div><div class="t">Training</div><div class="e">$10M and 10 fake startups Claude made up. It's practice, and I see how I did right away.</div></div>
+    <div class="rule"><div class="n px">Fund 2</div><div class="t">The real fund</div><div class="e">A new $10M and 10 real companies at their real early price. Names hidden. Every check is final.</div></div>
+    <div class="rule"><div class="n px">The score</div><div class="t">Worth today</div><div class="e">Each bet goes to what it's worth now. Can I beat just splitting the money evenly?</div></div>
+  </div>
+  <div class="foot">Most startups die. <em>One good bet can pay for all of them.</em></div></div>`, { kind:"how", steps:4 });
+
+const HINTS = `<div class="kick px">Read this first</div><h2 class="an">How investors think</h2>
+  <div class="tips">
+    <div class="tip"><b>Is the market huge?</b><span>A great small business won't return a fund.</span></div>
+    <div class="tip"><b>Does each sale make money?</b><span>Fast growth can hide a losing model.</span></div>
+    <div class="tip"><b>Who pays, and do they stay?</b><span>Repeat customers beat a big launch.</span></div>
+    <div class="tip"><b>What stops a copycat?</b><span>A trend isn't protection.</span></div>
+    <div class="tip"><b>Why now?</b><span>Great ideas die when they're early.</span></div>
+    <div class="tip"><b>Is the price fair?</b><span>A $400M start needs a far bigger finish.</span></div>
+  </div>`;
+add("", `<div class="panel">${HINTS}</div>`, { kind:"hints" });
+
+const line = (cls, label, text) => `<div class="ln ${cls}"><div class="l px">${label}</div><div class="t">${text}</div></div>`;
+const pitch = (rk, c, i) => add("", `<div class="panel">
+  <div class="ptop"><span class="chipx px">${ROUND[rk].word} ${i+1} of ${ROUND[rk].list.length}</span><span class="chipx px">${c.category}</span><span class="chipx px">${c.year}</span><span class="chipx px hk" data-hint>H · Hints</span></div>
+  <div class="deal">
+    <div class="shot"><div class="pic ${c.clear ? "" : "blur"}">${c.photo ? `<img src="${c.photo}" alt="">` : `<div class="nophoto an">?</div>`}</div>
+      <div class="price"><span class="l px">Company value<br>at this price</span><span class="n">${money(c.entry)}</span></div></div>
+    <div class="sheet"><div class="one">${c.one}</div>${line("", "Money", c.how)}${line("", "So far", c.traction)}${line("bull", "Why yes", c.bull)}${line("bear", "Why no", c.bear)}</div>
+  </div>
+  <div class="checks">${CHECKS.map((a,k)=>`<div class="ck" data-k="${k}"><span class="key px">${k}</span><span class="amt">${a === 0 ? "Pass" : a === "all" ? "All in" : money(a)}</span></div>`).join("")}</div></div>`, { kind:"pitch", rk, c, i });
+
+const reveal = (rk, i) => add("", `<div class="panel"><div class="ptop"><span class="chipx px">Reveal ${i+1} of ${ROUND[rk].list.length}</span></div><div class="rv"></div></div>`, { kind:"rvl", rk, i });
+
+splash("Fund 1 of 2", "Training<br><em>fund</em>", "Ten startups Claude made up. I get $10M to spread however I want, and whatever I don't invest stays as cash.", "t");
+TRAIN.forEach((c,i) => pitch("t", c, i));
+splash("Training fund", "Let's see<br>what I <em>built</em>", "Five years go by. Here's where every fake company ended up.", "t");
+TRAIN.forEach((c,i) => reveal("t", i));
+add("", `<div class="panel"><div class="res-k"></div><div class="res-v an"></div><div class="res-m an"></div><div class="res-e"></div></div>`, { kind:"result", rk:"t" });
+add("", `<div class="panel"><div class="kick px">What training taught me</div><h2 class="an">Ten lessons</h2><div class="lessons" id="lessons"></div></div>`, { kind:"lessons", rk:"t" });
+
+splash("Fund 2 of 2", "The real<br><em>fund</em>", "A new $10M. Ten real companies, at the real early price, with the names hidden. No results until every check is written.", "r");
+REAL.forEach((c,i) => pitch("r", c, i));
+splash("The real fund", "What's it<br>worth <em>today?</em>", "Every check is final. Smallest outcome first, biggest outcome last.", "r");
+REAL.forEach((c,i) => reveal("r", i));
+add("", `<div class="panel"><div class="res-k"></div><div class="res-v an"></div><div class="res-m an"></div><div class="res-e"></div></div>`, { kind:"result", rk:"r" });
+add("", `<div class="panel"><div class="kick px">My report card</div><h2 class="an">How did I do?</h2><div class="grid6" id="grid6"></div></div>`, { kind:"report", rk:"r" });
+add("", `<div class="panel"><div class="fin-k px">Final fund value</div><div class="fin-v an"></div><div class="fin-rank an"></div><div class="fin-l"></div><div class="vs"></div></div>`, { kind:"final", rk:"r" });
+
+// ---- HUD
+let cur = 0;
+function setV(id, v) { const e = document.getElementById(id); if (e.textContent !== v) { e.textContent = v; e.classList.remove("bump"); void e.offsetWidth; e.classList.add("bump"); } }
+function hud(s, shown) {
+  const rk = s.rk, L = rk ? ROUND[rk].list : [];
+  document.getElementById("lvl").textContent = rk ? ROUND[rk].label : "FAKE VC FUND";
+  const pips = document.getElementById("pips");
+  if (pips.children.length !== L.length) pips.innerHTML = L.map(()=>`<i class="pip"></i>`).join("");
+  const investing = s.kind === "pitch" || (rk && !["rvl","result","lessons","report","final"].includes(s.kind) && cur <= lastPitch(rk));
+  const done = investing ? (s.kind === "pitch" ? s.i : cur > lastPitch(rk) ? L.length : 0) : s.kind === "rvl" ? shown : L.length;
+  [...pips.children].forEach((e,i) => { e.classList.toggle("y", i < done); e.classList.toggle("cur", i === done && (s.kind === "pitch" || s.kind === "rvl")); });
+  document.getElementById("lk").textContent = investing ? "CASH LEFT" : rk ? "FUND VALUE" : "THE FUND";
+  setV("lv", !rk ? money(FUND) : investing ? money(cashLeft(rk)) : money(s.kind === "rvl" ? fundAfter(rk, shown) : fundFinal(rk)));
+  document.getElementById("rk").textContent = investing ? "DEALS DONE" : rk ? "REVEALED" : "";
+  setV("rv", !rk ? "" : investing ? String(deals(rk)) : `${done}/${L.length}`);
+}
+const lastPitch = rk => screens.reduce((m,s,i) => s.kind === "pitch" && s.rk === rk ? i : m, -1);
+
+// ---- investing
+const amountOf = (s, k) => CHECKS[k] === "all" ? cashLeft(s.rk) : CHECKS[k];
+const locked = s => S[s.rk][s.c.slot] != null;
+function renderPitch(s) {
+  const has = locked(s), a = S[s.rk][s.c.slot], left = cashLeft(s.rk);
+  s.el.querySelectorAll(".ck").forEach((e,k) => { const amt = amountOf(s, +k);
+    e.classList.toggle("sel", !has && s.sel === k);
+    e.classList.toggle("locked", has && (a === amt && (CHECKS[k] !== "all" || !CHECKS.includes(a))));
+    e.classList.toggle("off", has ? a !== amt : (k > 0 && (amt > left || amt <= 0))); });
+}
+function pick(s, k) { if (locked(s)) return; if (s.sel === k) return lock(s); const amt = amountOf(s, k); if (k > 0 && (amt > cashLeft(s.rk) || amt <= 0)) return;
+  s.sel = k; renderPitch(s); log("select", { n:cur, fund:s.rk, slot:s.c.slot, amount:amt }); }
+function lock(s) { if (locked(s)) return show(cur+1);
+  if (s.sel == null) { const b = s.el.querySelector(".checks"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); return; }
+  const amt = amountOf(s, s.sel); S[s.rk][s.c.slot] = amt; save(); log("invest", { n:cur, fund:s.rk, slot:s.c.slot, name:s.c.name, amount:amt }); renderPitch(s); hud(s);
+  setTimeout(() => { if (screens[cur] === s) show(cur+1); }, 650); }
+
+// ---- reveals
+function renderReveal(s) {
+  const c = order(s.rk)[s.i], a = put(s.rk, c), worth = a * c.multiple, passed = !a, up = c.multiple >= 1;
+  const sample = 1000000;
+  s.el.querySelector(".rv").innerHTML = `
+    <div class="shot"><div class="pic">${c.photo ? `<img src="${c.photo}" alt="${c.name}">` : `<div class="nophoto an">${c.name[0]}</div>`}</div>${c.logo ? `<div class="logo"><img src="${c.logo}" alt=""></div>` : ""}</div>
+    <div class="rs"><div class="tagline"><span class="tag px ${c.status === "DEAD" ? "dead" : ""}">${c.status}</span><span class="chipx px">${s.rk === "t" ? "Made up by Claude" : `Value ${c.asOf}`}</span></div>
+      <div class="nm an">${c.name}</div>
+      <div class="tiles">
+        <div class="tl"><div class="l px">${passed ? "I passed" : "I put in"}</div><div class="n">${passed ? "$0" : money(a)}</div></div>
+        <div class="tl ${up ? "up" : "down"}"><div class="l px">Multiple</div><div class="n">${times(c.multiple)}</div></div>
+        <div class="tl ${passed ? "" : up ? "up" : "down"}"><div class="l px">${passed ? `$1M would be` : "Now worth"}</div><div class="n">${money(passed ? sample * c.multiple : worth)}</div></div>
+      </div>
+      <div class="tell"><div class="roast">${c.roast}</div><div class="st">${c.story}</div>${c.lesson ? `<div class="lesson">${c.lesson}</div>` : ""}<div class="src px">${s.rk === "t" ? "Fake company. Fake outcome. The photo is AI." : `Before dilution. ${c.source}`}</div></div>
+    </div>`;
+  (s.timers || []).forEach(clearTimeout);
+  const T = s.el.querySelectorAll(".tl");
+  hud(s, s.i);
+  s.timers = [ setTimeout(() => T[0].classList.add("show"), 500), setTimeout(() => T[1].classList.add("show"), 1500),
+    setTimeout(() => { T[2].classList.add("show"); s.el.querySelector(".tell").classList.add("show"); hud(s, s.i + 1); log("revealed", { n:cur, fund:s.rk, name:c.name }); }, 2500) ];
+}
+
+// ---- results
+function renderResult(s) { const v = fundFinal(s.rk), m = v / FUND, e = evenSplit(s.rk), real = s.rk === "r";
+  s.el.querySelector(".res-k").textContent = real ? "I turned $10M into" : "In training, I turned $10M into";
+  const big = s.el.querySelector(".res-v"); big.textContent = money(v); big.classList.toggle("down", v < FUND);
+  s.el.querySelector(".res-m").textContent = `${times(m)} on the fund`;
+  s.el.querySelector(".res-e").textContent = `Splitting it evenly would have made ${money(e)}. ${v >= e ? `I beat it by ${money(v - e)}.` : `I lost to it by ${money(e - v)}.`}`; }
+function renderLessons(s) { s.el.querySelector("#lessons").innerHTML = order("t").map(c => `<div class="ls"><div class="a">${c.name}</div><div class="b ${c.multiple >= 1 ? "up" : ""}">${times(c.multiple)}</div><div class="c">${c.lesson}</div></div>`).join(""); }
+function card(l, n, d, sm) { return `<div class="rc"><div class="l px">${l}</div><div class="n ${sm?"sm":""}">${n}</div><div class="d">${d}</div></div>`; }
+function renderReport(s) { const L = REAL, v = fundFinal("r"), e = evenSplit("r"), tv = fundFinal("t");
+  const zero = L.filter(c => c.multiple === 0).reduce((t,c) => t + put("r",c), 0);
+  const best = [...L].sort((a,b) => put("r",b)*b.multiple - put("r",a)*a.multiple)[0];
+  const mx = Math.max(...L.map(c => c.multiple));
+  const miss = L.filter(c => c.multiple === mx).sort((a,b) => put("r",a) - put("r",b))[0];
+  const bigCheck = 5000000;
+  s.el.querySelector("#grid6").innerHTML =
+    card("Even split", money(e), v >= e ? "I beat doing nothing clever." : "Doing nothing clever beat me.") +
+    card("Training fund", money(tv), `${times(tv/FUND)} in training, ${times(v/FUND)} for real.`) +
+    card("Went to zero", money(zero), `${Math.round(zero/FUND*100)}% of the fund died.`) +
+    card("Best bet", put("r",best) ? best.name : "None", put("r",best) ? `${money(put("r",best))} became ${money(put("r",best)*best.multiple)}.` : "I never wrote a check that paid.", true) +
+    card("Biggest miss", miss.name, put("r",miss) ? `I only put in ${money(put("r",miss))}. A $5M check was ${money(bigCheck*miss.multiple)}.` : `I passed. A $5M check was ${money(bigCheck*miss.multiple)}.`, true) +
+    card("Cash I never used", money(cashLeft("r")), cashLeft("r") ? "It just sat there." : "Every dollar went to work.");
+  (s.timers || []).forEach(clearTimeout);
+  s.timers = [...s.el.querySelectorAll(".rc")].map((r,i) => setTimeout(() => r.classList.add("show"), 400 + i*900)); }
+const RANKS = [[4,"Legendary investor","Over four times what an even split made."],[2,"General partner","At least double an even split."],[1,"Junior associate","I beat an even split, so I keep my job."],[.25,"Stick to index funds","An even split beat me."],[0,"Fired by my investors","An even split made four times what I did."]];
+function renderFinal(s) { const v = fundFinal("r"), r = RANKS.find(x => v / evenSplit("r") >= x[0]);
+  s.el.querySelector(".fin-v").textContent = money(v); s.el.querySelector(".fin-rank").textContent = r[1]; s.el.querySelector(".fin-l").textContent = r[2];
+  const REID = 1.66e9, msg = v > REID ? "You beat Reid. Tell him in the comments." : "Reid wins this one.";
+  s.el.querySelector(".vs").innerHTML = `<div class="k px">Reid's real fund</div><div class="v">$1.66B</div><div class="d">Stick to index funds. ${msg}</div>`; }
+
+const RENDER = { pitch:renderPitch, rvl:renderReveal, result:renderResult, lessons:renderLessons, report:renderReport, final:renderFinal };
+function renderSteps(s) { s.el.querySelectorAll(".rule").forEach((r,i) => r.classList.toggle("show", i < s.step)); s.el.querySelector(".foot").classList.toggle("hide", s.step < s.steps); }
+function show(n) {
+  cur = Math.max(0, Math.min(screens.length-1, n));
+  screens.forEach((s,i) => s.el.classList.toggle("on", i===cur));
+  const s = screens[cur];
+  log("screen", { n:cur, kind:s.kind, fund:s.rk });
+  if (s.kind !== "rvl") hud(s);
+  if (s.steps) { s.step = 0; renderSteps(s); }
+  RENDER[s.kind]?.(s);
+}
+function next() {
+  const s = screens[cur];
+  if (s.steps && s.step < s.steps) { s.step++; renderSteps(s); log("screen", { n:cur, kind:s.kind, sub:s.step }); return; }
+  if (s.kind === "pitch") return lock(s);
+  show(cur+1);
+}
+
+stage.insertAdjacentHTML("beforeend", `<div id="hintlay"><div class="panel">${HINTS}</div></div>`);
+const hintlay = document.getElementById("hintlay");
+function toggleHint(on = !hintlay.classList.contains("on")) { hintlay.classList.toggle("on", on); log("hint", { n:cur, open:on }); }
+
+document.addEventListener("keydown", e => {
+  document.getElementById("help").style.display = "none";
+  const s = screens[cur], k = e.key.toLowerCase();
+  if (k === "h") return toggleHint();
+  if (hintlay.classList.contains("on")) { if (e.key==="Escape" || e.key===" " || e.key==="Enter" || e.key==="ArrowRight") { e.preventDefault(); toggleHint(false); } return; }
+  if (s.kind === "pitch" && /^[0-7]$/.test(e.key)) return pick(s, +e.key);
+  if (e.key==="ArrowRight" || e.key===" " || e.key==="Enter") { e.preventDefault(); next(); }
+  if (e.key==="ArrowLeft") show(cur-1);
+  if (k==="f") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  if (k==="r" && confirm("Erase everything and restart?")) { S = blank(); save(); log("reset"); screens.forEach(x => { x.sel = null; }); show(0); }
+});
+stage.addEventListener("click", e => {
+  document.getElementById("help").style.display = "none";
+  if (hintlay.classList.contains("on")) return toggleHint(false);
+  if (e.target.closest("[data-hint]")) return toggleHint(true);
+  const s = screens[cur], ck = e.target.closest(".ck");
+  if (ck) return pick(s, +ck.dataset.k);
+  if (s.kind === "pitch") return;
+  next();
+});
+
+function fit() { const k = Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+// show.html#12 jumps straight to screen 12 (to pick back up mid-take)
+addEventListener("resize", fit); fit(); show(parseInt(location.hash.slice(1)) || 0);
+</script>
+<a href="../" style="position:fixed;right:12px;bottom:12px;z-index:50;font:900 12px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#f4f1ea;background:rgba(0,0,0,.55);padding:9px 12px;text-decoration:none;border-radius:6px">&larr; All games</a>
+</body>
+</html>
